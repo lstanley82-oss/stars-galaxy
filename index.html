@@ -110,6 +110,93 @@ body:before{
 .memory-card:nth-child(1){background-image:url('assets/childhood.jpg');background-position:center 34%}.memory-card:nth-child(2){background-image:url('assets/tedx.jpg')}.memory-card:nth-child(3){background-image:url('assets/graduation.jpg')}
 @media(max-width:1050px){.app{grid-template-columns:78px 1fr}.sidebar{width:78px}.brand,.nav span,.side-quote{display:none}.nav a{justify-content:center}.main{grid-column:2}.hero-character,.hero-character-ring{right:3%}.stats{grid-template-columns:repeat(2,1fr)}.add{min-height:65px}.grid{grid-template-columns:1fr}.destinations{grid-template-columns:repeat(2,1fr)}.memory{grid-template-columns:1fr}}
 </style>
+
+<style id="visual-pass-3">
+/* VISUAL PASS 3: larger, cinematic, less compressed */
+:root{--vp3-gap:18px}
+html{font-size:17px}
+body{overflow-x:hidden}
+.sidebar{width:190px!important}
+.main,.main-content,main{margin-left:190px!important;max-width:none!important}
+.content,.dashboard,.page-content{max-width:1540px!important;margin:0 auto!important;padding-left:28px!important;padding-right:28px!important}
+
+/* Hero: give the world and Star room to breathe */
+.hero,.top-hero,.banner{
+  min-height:250px!important;
+  border-radius:0 0 24px 24px!important;
+  background-position:center 42%!important;
+  background-size:cover!important;
+  filter:none!important;
+}
+.hero:before,.top-hero:before,.banner:before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(5,7,20,.88) 0%,rgba(5,7,20,.40) 48%,rgba(5,7,20,.14) 72%,rgba(5,7,20,.55) 100%);
+  pointer-events:none
+}
+.hero img,.hero-avatar,.player-portrait{
+  width:176px!important;height:176px!important;
+  object-fit:cover!important;border-radius:50%!important;
+  box-shadow:0 0 0 5px rgba(190,67,255,.75),0 0 42px rgba(196,61,255,.5)!important
+}
+.hero h1,.banner h1{font-size:3.4rem!important;line-height:.9!important;letter-spacing:-.04em!important}
+.hero .eyebrow,.banner .eyebrow{font-size:.78rem!important;letter-spacing:.22em!important}
+
+/* Primary stats */
+.stats,.stat-grid,.summary-grid{gap:14px!important;margin-top:18px!important}
+.stat-card,.metric-card{min-height:92px!important;padding:18px 20px!important;border-radius:16px!important}
+.stat-card .number,.metric-card .number{font-size:1.8rem!important}
+
+/* Main workspace */
+.dashboard-grid,.main-grid{grid-template-columns:minmax(0,1.9fr) minmax(350px,.95fr)!important;gap:18px!important}
+.orbit,.today-orbit,.panel{border-radius:18px!important}
+.orbit,.today-orbit{min-height:500px!important;padding:20px!important}
+.orbit h2,.today-orbit h2,.panel h2{font-size:1.25rem!important}
+.quest-row,.task-row{min-height:66px!important;padding:12px 14px!important;font-size:.94rem!important}
+.right-column .panel,.side-panel{padding:18px!important}
+
+/* Destination cards stay navigation, but become more cinematic */
+.destination-grid,.nav-cards,.feature-cards{gap:14px!important;margin-top:18px!important}
+.destination-card,.nav-card,.feature-card{
+  min-height:126px!important;border-radius:18px!important;
+  background-size:cover!important;background-position:center!important
+}
+.destination-card:after,.nav-card:after,.feature-card:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 22%,rgba(4,6,17,.88) 100%);
+  pointer-events:none
+}
+
+/* Journey is biography, not another navigation row */
+.journey-strip,.history-grid,.journey-grid{
+  display:grid!important;grid-template-columns:1.15fr 1fr 1fr!important;
+  gap:16px!important;margin:22px 0 42px!important
+}
+.journey-card,.history-card{
+  min-height:190px!important;border-radius:20px!important;
+  background-size:cover!important;background-position:center!important;
+  position:relative!important;overflow:hidden!important
+}
+.journey-card:after,.history-card:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,rgba(4,6,17,.94) 100%);
+  pointer-events:none
+}
+
+/* Sidebar art is intentional, not accidental */
+.sidebar-art{height:320px!important;background-size:cover!important;background-position:center 30%!important;opacity:.78!important}
+.sidebar nav a{min-height:54px!important;font-size:.94rem!important}
+.sidebar .logo{font-size:1.55rem!important}
+
+/* breathing room */
+section{scroll-margin-top:24px}
+@media(max-width:1100px){
+ .sidebar{width:150px!important}
+ .main,.main-content,main{margin-left:150px!important}
+ .dashboard-grid,.main-grid{grid-template-columns:1fr!important}
+ .journey-strip,.history-grid,.journey-grid{grid-template-columns:1fr!important}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -189,7 +276,8 @@ body:before{
 </section>
 
 <section class="memory">
-  <div class="memory-card"><div><b>ORIGIN STORY</b><span>Where the journey started</span></div></div>
+  <div class="memory-card"><div><div style="grid-column:1/-1;margin:4px 0 0"><div style="font-size:.72rem;letter-spacing:.2em;color:#cf72ff;font-weight:800">STAR’S JOURNEY</div><div style="font-size:1.35rem;font-weight:800;margin-top:4px">From origin story to what comes next.</div></div>
+<b>ORIGIN STORY</b><span>Where the journey started</span></div></div>
   <div class="memory-card"><div><b>MILESTONES</b><span>Moments worth remembering</span></div></div>
   <div class="memory-card"><div><b>ACHIEVEMENTS</b><span>Progress made visible</span></div></div>
 </section>
