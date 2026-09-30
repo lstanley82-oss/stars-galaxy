@@ -1,33 +1,199 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Star's Galaxy</title>
 <style>
-:root{--bg:#070914;--panel:#0d1222;--panel2:#11172a;--line:#2b3150;--violet:#b42cff;--purple:#7c3cff;--blue:#5c8cff;--cyan:#71e7ff;--green:#61f3aa;--pink:#ff4d9d;--text:#f7f7ff;--muted:#aab0c8}
-*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 60% 10%,#21104b 0,#090b18 28%,#050711 70%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh} body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.32;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:82px 82px}
-.app{display:grid;grid-template-columns:210px 1fr;min-height:100vh}.sidebar{position:fixed;width:210px;height:100vh;padding:24px 14px;background:linear-gradient(180deg,rgba(5,7,17,.98),rgba(9,10,25,.96));border-right:1px solid #242844;overflow:hidden}.side-art{position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,transparent,#080916 70%),url('assets/purple-art.jpg') center/cover;opacity:.5}.brand{position:relative;z-index:2;font-weight:950;font-style:italic;font-size:22px;line-height:.9;margin:5px 8px 28px;text-shadow:0 0 18px #b32cff}.brand span{display:block;color:#d72cff;font-size:29px}.nav{position:relative;z-index:2;display:grid;gap:7px}.nav a{color:#c9cce0;text-decoration:none;padding:12px 13px;border-radius:10px;display:flex;gap:12px;align-items:center;font-size:14px}.nav a.active{color:white;background:linear-gradient(90deg,#8b27ee44,#47216b44);border:1px solid #6b32b5;box-shadow:inset 3px 0 #c52cff}.nav b{font-size:18px;width:20px;text-align:center}.quote{position:absolute;z-index:2;bottom:32px;left:22px;font-family:cursive;color:#ef8dff;font-size:20px;transform:rotate(-5deg);text-shadow:0 0 15px #c62cff}
-.main{grid-column:2;padding:0 22px 34px;max-width:1500px;width:100%;margin:auto}.hero{height:205px;margin:0 -22px 14px;position:relative;overflow:hidden;border-bottom:1px solid #4b2f78;background:linear-gradient(90deg,rgba(8,8,22,.25),rgba(11,7,29,.15)),url('assets/genshin.png') center 48%/cover}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080916 0%,transparent 20%,transparent 78%,#080916 100%),linear-gradient(0deg,#080916 0%,transparent 38%)}.hero-content{position:absolute;z-index:2;left:26px;bottom:22px}.logo{font-size:47px;font-weight:1000;font-style:italic;line-height:.82;text-transform:uppercase;letter-spacing:-3px;text-shadow:0 0 22px #a92dff}.logo span{display:block;color:#d62cff}.status{margin-top:15px;font-size:14px;font-weight:800;letter-spacing:2px}.status em{color:#cf4cff;font-style:normal}.date{position:absolute;z-index:2;right:24px;top:20px;font-size:13px;color:#d8d9e8}.avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #b62cff;margin-left:14px;vertical-align:middle}
-.stats{display:grid;grid-template-columns:repeat(4,1fr) 180px;gap:14px;margin:10px 0 14px}.stat,.panel,.tile{background:linear-gradient(180deg,rgba(17,23,42,.94),rgba(9,13,25,.96));border:1px solid #303755;border-radius:14px;box-shadow:0 10px 30px #0005}.stat{padding:13px 18px;display:flex;gap:15px;align-items:center}.stat .ico{font-size:26px;color:#b52cff}.num{font-size:27px;font-weight:900}.label{font-size:12px;font-weight:800}.sub{font-size:10px;color:var(--muted);margin-top:2px}.add{border:2px solid #df37ff;background:linear-gradient(135deg,#8427e8,#db26f3);box-shadow:0 0 18px #d72cffaa;color:white;font-size:18px;font-weight:900;border-radius:14px}
-.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.95fr);gap:14px}.panel{padding:15px}.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.panel-title h2{margin:0;font-size:18px}.panel-title small{color:#d94cff}.orbit-head{display:flex;align-items:center;gap:12px}.orbit-head .target{font-size:30px;color:#bc39ff}.progress{margin-left:auto;width:210px;height:10px;border-radius:8px;background:#28314a;overflow:hidden}.progress i{display:block;width:40%;height:100%;background:linear-gradient(90deg,#5cf2ad,#70e8d7);border-radius:8px}.tabs{display:flex;gap:7px;margin:12px 0}.tab{flex:1;padding:9px;border-radius:9px;background:#171e33;color:#cdd0e2;text-align:center;font-size:12px}.tab.active{background:linear-gradient(90deg,#8e2bed,#ca2ef3);color:white;font-weight:800}.quest{display:grid;grid-template-columns:34px 1fr auto auto;gap:10px;align-items:center;padding:11px 10px;border:1px solid #28304a;border-radius:10px;margin-top:8px;background:#0a101d}.check{width:24px;height:24px;border:2px solid #717995;border-radius:4px;display:grid;place-items:center}.check.done{background:#65f0ac;color:#05140c;border-color:#65f0ac}.quest strong{font-size:13px}.tag{display:inline-block;font-size:9px;padding:2px 8px;border:1px solid #435078;border-radius:10px;margin-top:4px;color:#c9cde1}.meta{font-size:10px;color:#c1c5d8}.action{padding:8px 12px;border:1px solid #b32cff;border-radius:8px;color:#efb5ff;font-size:10px;box-shadow:0 0 10px #b32cff55}.jobs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.jobstat{padding:10px 6px;text-align:center;border-radius:9px;background:#151b31;border:1px solid #333b5d}.jobstat b{display:block;font-size:20px}.jobstat small{font-size:9px}.next{margin-top:12px;padding:12px;border-radius:10px;background:#11182a;border:1px solid #303957}.target-logo{width:48px;height:48px;border-radius:8px;background:#e31837;color:#fff;display:grid;place-items:center;font-weight:1000;font-size:28px;float:left;margin-right:12px}.transmission{margin-top:14px}.activity{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #252b43;font-size:11px}.activity img{width:28px;height:28px;border-radius:50%;object-fit:cover}.activity time{color:#9fa6c0}.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}.tile{height:115px;position:relative;overflow:hidden;padding:16px;display:flex;align-items:flex-end;background-size:cover;background-position:center}.tile:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080b16 0%,#080b1666 65%,transparent)}.tile>*{position:relative;z-index:2}.tile h3{margin:0;font-size:17px}.tile p{margin:2px 0 0;font-size:11px;color:#d2d4e0}.tile:nth-child(1){background-image:url('assets/fortnite.png')}.tile:nth-child(2){background-image:url('assets/tedx.jpg')}.tile:nth-child(3){background-image:url('assets/graduation.jpg')}.tile:nth-child(4){background-image:url('assets/fire-art.jpg')}
-@media(max-width:1000px){.app{grid-template-columns:78px 1fr}.sidebar{width:78px}.brand,.nav span,.quote{display:none}.nav a{justify-content:center}.main{grid-column:2}.stats{grid-template-columns:repeat(2,1fr)}.add{min-height:62px}.grid{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,1fr)}}
+:root{
+  --bg:#050711; --panel:#0b1020; --panel2:#11172a; --line:#2a3150;
+  --violet:#a82cff; --pink:#ed38ff; --blue:#5f8cff; --cyan:#72e9ff;
+  --green:#65efae; --yellow:#ffc857; --text:#f7f5ff; --muted:#aab1cb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  min-height:100vh;background:
+  radial-gradient(circle at 67% 0%,#291151 0,transparent 25%),
+  radial-gradient(circle at 44% 85%,#151047 0,transparent 27%),#050711;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;
+  background-image:radial-gradient(#fff 1px,transparent 1px);background-size:76px 76px
+}
+.app{display:grid;grid-template-columns:218px 1fr;min-height:100vh}
+.sidebar{
+  position:fixed;z-index:20;width:218px;height:100vh;border-right:1px solid #282344;
+  background:linear-gradient(180deg,rgba(5,6,16,.99),rgba(8,8,22,.97));overflow:hidden
+}
+.side-art{
+  position:absolute;inset:auto 0 0;height:48%;
+  background:linear-gradient(180deg,#07081400 0,#070814bb 53%,#070814 92%),url('assets/purple-art.jpg') center/cover;
+  opacity:.67
+}
+.brand{position:relative;z-index:2;padding:26px 20px 20px;font-weight:1000;font-style:italic;line-height:.82;font-size:22px;text-shadow:0 0 18px #c12cff}
+.brand span{display:block;font-size:30px;color:#d830ff}
+.nav{position:relative;z-index:2;padding:0 13px;display:grid;gap:6px}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:#c7cade;text-decoration:none;font-size:13px}
+.nav a.active{color:white;background:linear-gradient(90deg,#9d27f43d,#6b25a629);border:1px solid #7433bc;box-shadow:inset 3px 0 #d42cff,0 0 18px #7c2cff1f}
+.nav b{font-size:18px;width:20px;text-align:center}.nav small{color:#a7acc2}
+.side-quote{position:absolute;z-index:3;bottom:27px;left:21px;font-family:cursive;color:#f094ff;font-size:20px;line-height:1.2;transform:rotate(-5deg);text-shadow:0 0 14px #d12cff}
+.main{grid-column:2;max-width:1530px;width:100%;margin:auto;padding:0 22px 34px}
+
+/* HERO */
+.hero{
+  height:245px;margin:0 -22px 15px;position:relative;overflow:hidden;border-bottom:1px solid #553481;
+  background:url('assets/genshin.png') center 52%/cover
+}
+.hero:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,#070916 0%,rgba(7,9,22,.28) 22%,rgba(7,9,22,.05) 60%,#070916 100%),
+    linear-gradient(0deg,#070916 0%,transparent 46%);
+}
+.hero:after{
+  content:"";position:absolute;right:4%;bottom:-15px;width:285px;height:285px;border-radius:50%;
+  background:radial-gradient(circle,#cf37ff2e 0,#7a2cff12 42%,transparent 70%);filter:blur(1px)
+}
+.hero-copy{position:absolute;z-index:4;left:28px;top:49px}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:2.4px;color:#d69bff;margin-bottom:8px}
+.logo{font-size:52px;font-weight:1000;font-style:italic;line-height:.78;letter-spacing:-3.5px;text-transform:uppercase;text-shadow:0 0 23px #a72cff}
+.logo span{display:block;color:#dc35ff}
+.status{margin-top:17px;font-size:13px;font-weight:900;letter-spacing:2px}.status em{font-style:normal;color:#e44aff}
+.hero-character{
+  position:absolute;z-index:3;right:9%;bottom:-56px;width:255px;height:255px;border-radius:50%;
+  object-fit:cover;object-position:center 22%;border:2px solid #d449ff;
+  box-shadow:0 0 0 8px #8f2cff18,0 0 48px #bb32ff66;
+}
+.hero-character-ring{position:absolute;z-index:2;right:7.3%;bottom:-74px;width:300px;height:300px;border-radius:50%;border:1px solid #bd48ff55;box-shadow:0 0 40px #a52cff33}
+.hero-date{position:absolute;z-index:5;right:24px;top:20px;font-size:11px;letter-spacing:.7px;color:#e0dff0}
+.hero-tag{position:absolute;z-index:5;right:32px;bottom:20px;background:#090d1ad9;border:1px solid #56347a;border-radius:999px;padding:8px 13px;font-size:10px;color:#c9cce0}
+.hero-tag b{color:#70f0b0}
+
+/* TOP STRIP */
+.stats{display:grid;grid-template-columns:repeat(4,1fr) 170px;gap:12px;margin-bottom:14px}
+.stat,.panel,.destination{background:linear-gradient(180deg,rgba(16,22,40,.96),rgba(8,12,24,.97));border:1px solid #2c3453;box-shadow:0 10px 30px #0006}
+.stat{min-height:77px;border-radius:13px;padding:12px 15px;display:flex;gap:13px;align-items:center}
+.stat .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#8428d92b;color:#d048ff;font-size:21px;border:1px solid #843bb05c}
+.stat:nth-child(2) .ico{color:#6f9cff;background:#294c9a2b}.stat:nth-child(3) .ico{color:#70e7ff;background:#2a86952b}.stat:nth-child(4) .ico{color:#ffc95d;background:#9a73292b}
+.num{font-size:24px;font-weight:950;line-height:1}.label{font-size:11px;font-weight:850;margin-top:3px}.sub{font-size:9.5px;color:var(--muted);margin-top:2px}
+.add{border:2px solid #e23cff;border-radius:13px;background:linear-gradient(135deg,#8126e6,#d629ed);color:white;font-size:17px;font-weight:950;box-shadow:0 0 20px #d82cff88}
+
+/* CONTENT */
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(340px,.95fr);gap:14px}
+.panel{border-radius:14px;padding:14px}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}.panel-title h2{margin:0;font-size:17px}.panel-title small{color:#db4cff}
+.orbit-head{display:flex;align-items:center;gap:11px}.orbit-icon{font-size:29px;color:#c83cff}.orbit-head h2{font-size:18px}
+.progress{margin-left:auto;width:205px;height:9px;border-radius:8px;background:#28314a;overflow:hidden}.progress i{display:block;width:40%;height:100%;border-radius:8px;background:linear-gradient(90deg,#65efae,#70e8d7)}
+.tabs{display:flex;gap:7px;margin:11px 0}.tab{flex:1;padding:8px;border-radius:8px;background:#161d32;text-align:center;font-size:11px;color:#cdd0e1}.tab.active{font-weight:850;color:#fff;background:linear-gradient(90deg,#8c29eb,#d52cf0)}
+.quest{display:grid;grid-template-columns:32px 1fr auto auto;gap:9px;align-items:center;padding:10px 9px;margin-top:7px;border-radius:9px;border:1px solid #28304a;background:#09101d}
+.check{width:23px;height:23px;border:2px solid #717994;border-radius:4px;display:grid;place-items:center}.check.done{background:#65efae;color:#06140e;border-color:#65efae}
+.quest strong{font-size:12px}.tag{display:inline-block;font-size:8px;padding:2px 7px;margin-top:3px;border:1px solid #445075;border-radius:9px;color:#c9cde1}.meta{font-size:9px;color:#c1c5d8}.action{padding:7px 10px;border:1px solid #b52cff;border-radius:7px;color:#efb7ff;font-size:9px;box-shadow:0 0 10px #b32cff40}
+.jobs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.jobstat{padding:9px 5px;text-align:center;border-radius:8px;background:#151b31;border:1px solid #333b5d}.jobstat b{display:block;font-size:18px}.jobstat small{font-size:8px}
+.next{margin-top:11px;padding:11px;border-radius:9px;background:#11182a;border:1px solid #303957}.target-logo{width:45px;height:45px;border-radius:8px;background:#e31837;color:white;display:grid;place-items:center;font-size:25px;font-weight:1000;float:left;margin-right:11px}
+.crew{margin-top:14px}.crew-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #242b42}.crew-row:last-child{border-bottom:0}.crew-row img{width:31px;height:31px;border-radius:50%;object-fit:cover;border:1px solid #8741c3}.crew-row b{font-size:11px}.crew-row small{display:block;color:#989fb8;font-size:9px}.online{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#65efae;box-shadow:0 0 8px #65efae}
+.transmission{margin-top:14px}.activity{display:grid;grid-template-columns:29px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #252b43;font-size:10px}.activity img{width:27px;height:27px;border-radius:50%;object-fit:cover}.activity time{color:#9fa6c0}
+
+/* DESTINATIONS */
+.destinations{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.destination{height:126px;border-radius:14px;position:relative;overflow:hidden;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:15px}
+.destination:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#070a15 3%,#070a1580 55%,transparent)}
+.destination:after{content:"→";position:absolute;right:13px;bottom:15px;width:29px;height:29px;border-radius:50%;display:grid;place-items:center;border:1px solid #d54cff;color:#fff;background:#090c18cc}
+.destination>div{position:relative;z-index:2}.destination h3{margin:0;font-size:16px}.destination p{margin:2px 0 0;font-size:10px;color:#d4d6e1}
+.destination:nth-child(1){background-image:url('assets/fortnite.png')}.destination:nth-child(2){background-image:url('assets/tedx.jpg')}.destination:nth-child(3){background-image:url('assets/graduation.jpg')}.destination:nth-child(4){background-image:url('assets/fire-art.jpg')}
+
+/* MEMORY STRIP */
+.memory{margin-top:14px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}
+.memory-card{height:108px;border-radius:13px;overflow:hidden;position:relative;border:1px solid #303653;background-size:cover;background-position:center}
+.memory-card:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080b18e8 0,#080b1880 48%,transparent)}
+.memory-card div{position:absolute;z-index:2;left:15px;bottom:14px}.memory-card b{display:block;font-size:13px}.memory-card span{font-size:9px;color:#c8cbd9}
+.memory-card:nth-child(1){background-image:url('assets/childhood.jpg');background-position:center 34%}.memory-card:nth-child(2){background-image:url('assets/tedx.jpg')}.memory-card:nth-child(3){background-image:url('assets/graduation.jpg')}
+@media(max-width:1050px){.app{grid-template-columns:78px 1fr}.sidebar{width:78px}.brand,.nav span,.side-quote{display:none}.nav a{justify-content:center}.main{grid-column:2}.hero-character,.hero-character-ring{right:3%}.stats{grid-template-columns:repeat(2,1fr)}.add{min-height:65px}.grid{grid-template-columns:1fr}.destinations{grid-template-columns:repeat(2,1fr)}.memory{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
-<aside class="sidebar"><div class="side-art"></div><div class="brand">STAR'S<span>GALAXY</span></div><nav class="nav"><a class="active"><b>⌂</b><span>Galaxy<br><small>Home</small></span></a><a><b>☑</b><span>Quests<br><small>Tasks & Habits</small></span></a><a><b>▣</b><span>Job Hunt<br><small>Opportunities</small></span></a><a><b>▤</b><span>Inventory<br><small>Documents</small></span></a><a><b>◷</b><span>Log<br><small>Activity History</small></span></a><a><b>♧</b><span>Crew<br><small>Family</small></span></a><a><b>⚙</b><span>Settings<br><small>Profile & Preferences</small></span></a></nav><div class="quote">Progress<br>Lives Here ♕</div></aside>
+<aside class="sidebar">
+  <div class="side-art"></div>
+  <div class="brand">STAR'S<span>GALAXY</span></div>
+  <nav class="nav">
+    <a class="active"><b>⌂</b><span>Galaxy<br><small>Home</small></span></a>
+    <a><b>☑</b><span>Quests<br><small>Tasks & Habits</small></span></a>
+    <a><b>▣</b><span>Job Hunt<br><small>Opportunities</small></span></a>
+    <a><b>▤</b><span>Inventory<br><small>Documents</small></span></a>
+    <a><b>◷</b><span>Log<br><small>Activity History</small></span></a>
+    <a><b>♧</b><span>Crew<br><small>Family</small></span></a>
+    <a><b>⚙</b><span>Settings<br><small>Profile & Preferences</small></span></a>
+  </nav>
+  <div class="side-quote">Progress<br>Lives Here ♕</div>
+</aside>
+
 <main class="main">
-<section class="hero"><div class="hero-content"><div class="logo">STAR'S<span>GALAXY</span></div><div class="status">EVENOTTER <em>// ONLINE</em></div></div><div class="date">TUE, SEP 29, 2026 <img class="avatar" src="assets/star-avatar.jpg"></div></section>
-<section class="stats"><div class="stat"><div class="ico">✓</div><div><div class="num">5</div><div class="label">Today's Quests</div><div class="sub">2 complete · 3 remaining</div></div></div><div class="stat"><div class="ico">▣</div><div><div class="num">3</div><div class="label">Active Applications</div><div class="sub">2 follow-ups · 1 interview</div></div></div><div class="stat"><div class="ico">⌕</div><div><div class="num">8</div><div class="label">Job Opportunities</div><div class="sub">4 new this week</div></div></div><div class="stat"><div class="ico">▤</div><div><div class="num">3</div><div class="label">Key Documents</div><div class="sub">Resume · Cover Letters · References</div></div></div><button class="add">＋ ADD⌄</button></section>
-<div class="grid"><section class="panel"><div class="orbit-head"><div class="target">◎</div><div><h2 style="margin:0">TODAY'S ORBIT</h2><div class="sub">Your missions for today</div></div><div class="progress"><i></i></div><b style="font-size:12px">2 / 5 complete</b></div><div class="tabs"><div class="tab active">Today (5)</div><div class="tab">Upcoming (7)</div><div class="tab">Overdue (1)</div></div>
-<div class="quest"><div class="check done">✓</div><div><strong>☀️ Get dressed and ready for the day</strong><br><span class="tag">Daily Routine</span></div><div class="meta">📷 Photo required · 9:00 AM</div><div class="action">Completed</div></div>
-<div class="quest"><div class="check"></div><div><strong>⌂ Leave the house today</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · 5:00 PM</div><div class="action">📷 Upload Photo</div></div>
-<div class="quest"><div class="check"></div><div><strong>▣ Apply to Costco · Front End Assistant</strong><br><span class="tag">Job Hunt</span></div><div class="meta">🔗 Screenshot/link · Today</div><div class="action">View Job →</div></div>
-<div class="quest"><div class="check done">✓</div><div><strong>🏋 30 minutes of activity</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · Completed</div><div class="action">Completed</div></div>
-<div class="quest"><div class="check"></div><div><strong>▤ Clean room</strong><br><span class="tag">Home</span></div><div class="meta">📷 Photo required · 8:00 PM</div><div class="action">📷 Upload Photo</div></div></section>
-<aside><section class="panel"><div class="panel-title"><h2>▣ JOB HUNT</h2><small>View All →</small></div><div class="jobs"><div class="jobstat"><b>8</b><small>Opportunities</small></div><div class="jobstat"><b>3</b><small>Active</small></div><div class="jobstat"><b>2</b><small>Follow-Ups</small></div><div class="jobstat"><b>1</b><small>Interview</small></div></div><div class="next"><div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:6px;font-size:13px"><strong>Target</strong><br>Guest Advocate</div><div class="sub">Oxn Hill, MD · Part time · ~4 miles</div></div></section>
-<section class="panel transmission"><div class="panel-title"><h2>〽 RECENT TRANSMISSIONS</h2><small>View All →</small></div><div class="activity"><img src="assets/purple-art.jpg"><div><b>Tay</b> added a job opportunity<div class="sub">Target · Guest Advocate</div></div><time>2:14 PM</time></div><div class="activity"><img src="assets/star-avatar.jpg"><div><b>Star</b> completed a daily quest<div class="sub">Get dressed and ready for the day</div></div><time>9:12 AM</time></div><div class="activity"><img src="assets/childhood.jpg"><div><b>Dad</b> assigned a mission<div class="sub">Apply to Costco · Front End Assistant</div></div><time>8:46 AM</time></div></section></aside></div>
-<section class="tiles"><div class="tile"><div><h3>QUESTS</h3><p>Tasks & Habits</p></div></div><div class="tile"><div><h3>JOB HUNT</h3><p>Opportunities & Applications</p></div></div><div class="tile"><div><h3>INVENTORY</h3><p>Documents</p></div></div><div class="tile"><div><h3>LOG</h3><p>Activity History</p></div></div></section>
-</main></div>
-</body></html>
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">PLAYER WORLD // PERSONAL COMMAND CENTER</div>
+    <div class="logo">STAR'S<span>GALAXY</span></div>
+    <div class="status">EVENOTTER <em>// ONLINE</em></div>
+  </div>
+  <div class="hero-date">TUE, SEP 29, 2026</div>
+  <div class="hero-character-ring"></div>
+  <img class="hero-character" src="assets/star-avatar.jpg" alt="Star">
+  <div class="hero-tag"><b>● SYSTEM ONLINE</b> &nbsp; PLAYER ONE</div>
+</section>
+
+<section class="stats">
+  <div class="stat"><div class="ico">✓</div><div><div class="num">5</div><div class="label">Today's Quests</div><div class="sub">2 complete · 3 remaining</div></div></div>
+  <div class="stat"><div class="ico">▣</div><div><div class="num">3</div><div class="label">Active Applications</div><div class="sub">2 follow-ups · 1 interview</div></div></div>
+  <div class="stat"><div class="ico">⌕</div><div><div class="num">8</div><div class="label">Job Opportunities</div><div class="sub">4 new this week</div></div></div>
+  <div class="stat"><div class="ico">▤</div><div><div class="num">3</div><div class="label">Key Documents</div><div class="sub">Resume · Cover Letters · References</div></div></div>
+  <button class="add">＋ ADD⌄</button>
+</section>
+
+<div class="grid">
+<section class="panel">
+  <div class="orbit-head"><div class="orbit-icon">◎</div><div><h2 style="margin:0">TODAY'S ORBIT</h2><div class="sub">Your missions for today</div></div><div class="progress"><i></i></div><b style="font-size:11px">2 / 5 complete</b></div>
+  <div class="tabs"><div class="tab active">Today (5)</div><div class="tab">Upcoming (7)</div><div class="tab">Overdue (1)</div></div>
+  <div class="quest"><div class="check done">✓</div><div><strong>☀️ Get dressed and ready for the day</strong><br><span class="tag">Daily Routine</span></div><div class="meta">📷 Photo required · 9:00 AM</div><div class="action">Completed</div></div>
+  <div class="quest"><div class="check"></div><div><strong>⌂ Leave the house today</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · 5:00 PM</div><div class="action">📷 Upload Photo</div></div>
+  <div class="quest"><div class="check"></div><div><strong>▣ Apply to Costco · Front End Assistant</strong><br><span class="tag">Job Hunt</span></div><div class="meta">🔗 Screenshot/link · Today</div><div class="action">View Job →</div></div>
+  <div class="quest"><div class="check done">✓</div><div><strong>🏋 30 minutes of activity</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · Completed</div><div class="action">Completed</div></div>
+  <div class="quest"><div class="check"></div><div><strong>▤ Clean room</strong><br><span class="tag">Home</span></div><div class="meta">📷 Photo required · 8:00 PM</div><div class="action">📷 Upload Photo</div></div>
+</section>
+
+<aside>
+  <section class="panel">
+    <div class="panel-title"><h2>▣ JOB HUNT</h2><small>View All →</small></div>
+    <div class="jobs"><div class="jobstat"><b>8</b><small>Opportunities</small></div><div class="jobstat"><b>3</b><small>Active</small></div><div class="jobstat"><b>2</b><small>Follow-Ups</small></div><div class="jobstat"><b>1</b><small>Interview</small></div></div>
+    <div class="next"><div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:5px;font-size:12px"><strong>Target</strong><br>Guest Advocate</div><div class="sub">Oxn Hill, MD · Part time · ~4 miles</div></div>
+  </section>
+  <section class="panel crew">
+    <div class="panel-title"><h2>♧ GALAXY CREW</h2><small>Family</small></div>
+    <div class="crew-row"><img src="assets/childhood.jpg"><div><b>Dad</b><small>Galaxy Crew</small></div><i class="online"></i></div>
+    <div class="crew-row"><img src="assets/purple-art.jpg"><div><b>Mom</b><small>Galaxy Crew</small></div><i class="online"></i></div>
+    <div class="crew-row"><img src="assets/fire-art.jpg"><div><b>Tay</b><small>Galaxy Crew</small></div><i class="online"></i></div>
+  </section>
+  <section class="panel transmission">
+    <div class="panel-title"><h2>〽 RECENT TRANSMISSIONS</h2><small>View All →</small></div>
+    <div class="activity"><img src="assets/purple-art.jpg"><div><b>Tay</b> added a job opportunity<div class="sub">Target · Guest Advocate</div></div><time>2:14 PM</time></div>
+    <div class="activity"><img src="assets/star-avatar.jpg"><div><b>Star</b> completed a daily quest<div class="sub">Get dressed and ready for the day</div></div><time>9:12 AM</time></div>
+    <div class="activity"><img src="assets/childhood.jpg"><div><b>Dad</b> assigned a mission<div class="sub">Apply to Costco · Front End Assistant</div></div><time>8:46 AM</time></div>
+  </section>
+</aside>
+</div>
+
+<section class="destinations">
+  <div class="destination"><div><h3>QUESTS</h3><p>Tasks & Habits</p></div></div>
+  <div class="destination"><div><h3>JOB HUNT</h3><p>Opportunities & Applications</p></div></div>
+  <div class="destination"><div><h3>INVENTORY</h3><p>Documents & Evidence</p></div></div>
+  <div class="destination"><div><h3>LOG</h3><p>Activity History</p></div></div>
+</section>
+
+<section class="memory">
+  <div class="memory-card"><div><b>ORIGIN STORY</b><span>Where the journey started</span></div></div>
+  <div class="memory-card"><div><b>MILESTONES</b><span>Moments worth remembering</span></div></div>
+  <div class="memory-card"><div><b>ACHIEVEMENTS</b><span>Progress made visible</span></div></div>
+</section>
+</main>
+</div>
+</body>
+</html>
