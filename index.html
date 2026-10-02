@@ -530,6 +530,45 @@ button,.destination,.nav a,.panel-title small,.hero-tag{cursor:pointer}
 }
 </style>
 
+
+<style id="management-controls-v1-1">
+/* LIVE v1.1: management controls only. Existing visual system is preserved. */
+.quest{grid-template-columns:25px minmax(0,1fr) auto auto auto}
+.manage-btn{
+  width:29px;height:29px;display:grid;place-items:center;padding:0;
+  border:1px solid #394361;border-radius:7px;background:#101728;color:#d6d9e8;
+  font-size:15px;font-weight:900;line-height:1;cursor:pointer
+}
+.manage-btn:hover{border-color:#b83bf6;color:#f4c9ff;box-shadow:0 0 12px #a82cff28}
+.record-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px}
+.record-actions .secondary-btn,.record-actions .danger-btn{padding:6px 9px;font-size:8px}
+.manage-summary{
+  margin-bottom:12px;padding:11px;border:1px solid #303a59;border-radius:10px;background:#09101d
+}
+.manage-summary b{display:block;font-size:12px;margin-bottom:4px}
+.manage-summary p{margin:0;color:#aab1cb;font-size:9px;line-height:1.5}
+.danger-zone{
+  margin-top:16px;padding:12px;border:1px solid #6d3044;border-radius:11px;
+  background:#21101a
+}
+.danger-zone b{display:block;color:#ffc0cf;font-size:10px;margin-bottom:4px}
+.danger-zone p{margin:0 0 9px;color:#c799a5;font-size:8.5px;line-height:1.5}
+.current-check{display:flex;align-items:center;gap:8px;min-height:38px}
+.current-check input{width:auto}
+@media(max-width:1100px){
+  .quest{grid-template-columns:24px minmax(0,1fr) auto auto}
+  .quest .meta{grid-column:2;white-space:normal}
+  .quest .action{grid-column:3;grid-row:1 / span 2}
+  .quest .manage-btn{grid-column:4;grid-row:1 / span 2}
+}
+@media(max-width:720px){
+  .quest{grid-template-columns:24px minmax(0,1fr) auto}
+  .quest .meta{grid-column:2;grid-row:auto;white-space:normal}
+  .quest .action{grid-column:2;grid-row:auto;justify-self:start}
+  .quest .manage-btn{grid-column:3;grid-row:1 / span 2}
+}
+</style>
+
 </head>
 <body>
 <aside class="sidebar">
@@ -1494,6 +1533,607 @@ button,.destination,.nav a,.panel-title small,.hero-tag{cursor:pointer}
         await db.auth.signOut();
         closeModal();
       };
+    });
+  }
+
+
+  /* ================================================================
+     LIVE v1.1 — EDIT / DELETE MANAGEMENT CONTROLS
+     ================================================================ */
+
+  function selected(value, current) {
+    return String(value ?? '') === String(current ?? '') ? 'selected' : '';
+  }
+
+  function questById(id) { return state.quests.find(q => q.id === id) || null; }
+  function jobById(id) { return state.jobs.find(j => j.id === id) || null; }
+  function documentById(id) { return state.documents.find(d => d.id === id) || null; }
+
+  async function storagePathsFor(filterColumn, parentId) {
+    const { data, error } = await db.from('evidence').select('storage_path').eq(filterColumn, parentId);
+    if (error) {
+      console.warn('Could not inspect evidence storage paths:', error.message);
+      return [];
+    }
+    return (data || []).map(r => r.storage_path).filter(Boolean);
+  }
+
+  async function cleanupStorage(paths) {
+    if (!paths.length) return;
+    const { error } = await db.storage.from(EVIDENCE_BUCKET).remove(paths);
+    if (error) console.warn('Storage cleanup warning:', error.message);
+  }
+
+  async function nullActivityReference(column, id) {
+    const patch = {};
+    patch[column] = null;
+    const { error } = await db.from('activity_log').update(patch).eq(column, id);
+    if (error) console.warn(`Activity reference cleanup warning (${column}):`, error.message);
+  }
+
+  async function bestEffortDelete(table, column, id) {
+    try {
+      const { error } = await db.from(table).delete().eq(column, id);
+      if (error) console.warn(`Dependency cleanup warning (${table}):`, error.message);
+    } catch (err) {
+      console.warn(`Dependency cleanup warning (${table}):`, err);
+    }
+  }
+
+  function renderQuests() {
+    const buckets = questBuckets();
+    const todayComplete = buckets.today.filter(q => q.status === 'completed').length;
+    const pct = buckets.today.length ? Math.round(todayComplete / buckets.today.length * 100) : 0;
+    $('#questProgressBar').style.width = `${pct}%`;
+    $('#questProgressLabel').textContent = `${todayComplete} / ${buckets.today.length} complete`;
+    $('#questProgress').setAttribute('aria-label', `${pct} percent complete`);
+
+    $$('#questTabs .tab').forEach(btn => {
+      const key = btn.dataset.tab;
+      const label = key === 'today' ? 'Today' : key === 'upcoming' ? 'Upcoming' : 'Overdue';
+      btn.textContent = `${label} (${buckets[key].length})`;
+      btn.classList.toggle('active', key === state.activeQuestTab);
+    });
+
+    const list = buckets[state.activeQuestTab] || [];
+    const host = $('#questList');
+
+    if (!list.length) {
+      const copy = state.activeQuestTab === 'today'
+        ? 'No quests in today’s orbit yet. Use + ADD to create one.'
+        : state.activeQuestTab === 'upcoming'
+          ? 'No upcoming quests.'
+          : 'No overdue quests. Clear orbit.';
+      host.innerHTML = `<div class="quest-list-empty">${copy}</div>`;
+      return;
+    }
+
+    host.innerHTML = list.map(q => {
+      const done = q.status === 'completed';
+      const needsEvidence = !!q.evidence_required && !done;
+      const actionText = done ? 'Completed' : needsEvidence
+        ? (['photo','screenshot'].includes(q.evidence_type) ? '📷 Upload Evidence'
+          : q.evidence_type === 'link' ? '🔗 Add Link' : '📎 Add Evidence')
+        : q.job_id ? 'View Job →' : 'Complete';
+
+      return `
+        <div class="quest" data-quest-id="${escapeHtml(q.id)}">
+          <button class="check ${done?'done':''}" type="button" data-quest-check="${escapeHtml(q.id)}" aria-label="${done?'Reopen':'Complete'} quest">${done?'✓':''}</button>
+          <div><strong>${questIcon(q.category)} ${escapeHtml(q.title)}</strong><br><span class="tag">${escapeHtml(q.category || 'Other')}</span></div>
+          <div class="meta">${escapeHtml(questMeta(q))}</div>
+          <button class="action" type="button" data-quest-action="${escapeHtml(q.id)}">${escapeHtml(actionText)}</button>
+          <button class="manage-btn" type="button" data-quest-manage="${escapeHtml(q.id)}" aria-label="Edit or delete ${escapeHtml(q.title)}" title="Edit / Delete">⋯</button>
+        </div>`;
+    }).join('');
+
+    $$('[data-quest-check]', host).forEach(btn =>
+      btn.addEventListener('click', () => handleQuestCheck(btn.dataset.questCheck))
+    );
+    $$('[data-quest-action]', host).forEach(btn =>
+      btn.addEventListener('click', () => handleQuestAction(btn.dataset.questAction))
+    );
+    $$('[data-quest-manage]', host).forEach(btn =>
+      btn.addEventListener('click', () => showQuestManager(btn.dataset.questManage))
+    );
+  }
+
+  function showQuestManager(id) {
+    const q = questById(id);
+    if (!q) return toast('Quest not found.', 'error');
+
+    const due = [q.due_date ? formatDate(q.due_date) : '', q.due_time ? formatTime(q.due_time) : '']
+      .filter(Boolean).join(' · ');
+    const evidence = q.evidence_required
+      ? `Evidence required: ${(q.evidence_type || 'any').replace('_',' ')}`
+      : 'No evidence required';
+
+    openModal('Manage Quest', `
+      <div class="manage-summary">
+        <b>${escapeHtml(q.title)}</b>
+        <p>${escapeHtml([q.category, due, q.status?.replace('_',' '), evidence].filter(Boolean).join(' · '))}</p>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="editQuestBtn" type="button">Edit Quest</button>
+        <button class="secondary-btn" id="closeQuestManager" type="button">Close</button>
+      </div>
+      <div class="danger-zone">
+        <b>Delete quest</b>
+        <p>This permanently removes the quest. Associated evidence records are removed, and uploaded evidence files are cleaned from private storage.</p>
+        <button class="danger-btn" id="deleteQuestBtn" type="button">Delete Quest</button>
+      </div>
+    `, () => {
+      $('#editQuestBtn').onclick = () => showQuestForm(q);
+      $('#closeQuestManager').onclick = closeModal;
+      $('#deleteQuestBtn').onclick = () => deleteQuest(q);
+    });
+  }
+
+  function showQuestForm(existing=null) {
+    if (!state.actorProfile) return showIdentityPicker(true);
+
+    const isEdit = !!existing;
+    const today = localISODate();
+    const evidenceValue = existing?.evidence_required ? (existing.evidence_type || 'any') : '';
+    const categories = ['Daily Routine','Home','Personal','Appointment','Job Hunt','Other'];
+
+    openModal(isEdit ? 'Edit Quest' : 'Create Quest', `
+      <form id="questForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Quest title</label><input name="title" maxlength="160" required placeholder="What needs to happen?" value="${escapeHtml(existing?.title || '')}"></div>
+          <div class="field"><label>Category</label><select name="category">
+            ${categories.map(v=>`<option ${selected(v,existing?.category)}>${v}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>Due date</label><input name="due_date" type="date" value="${escapeHtml(existing?.due_date || today)}" required></div>
+          <div class="field"><label>Due time</label><input name="due_time" type="time" value="${escapeHtml(existing?.due_time ? String(existing.due_time).slice(0,5) : '')}"></div>
+          <div class="field"><label>Evidence</label><select name="evidence_type">
+            <option value="" ${selected('',evidenceValue)}>No evidence required</option>
+            <option value="photo" ${selected('photo',evidenceValue)}>Photo</option>
+            <option value="screenshot" ${selected('screenshot',evidenceValue)}>Screenshot</option>
+            <option value="link" ${selected('link',evidenceValue)}>Link</option>
+            <option value="contact_note" ${selected('contact_note',evidenceValue)}>Contact note</option>
+            <option value="document" ${selected('document',evidenceValue)}>Document</option>
+            <option value="any" ${selected('any',evidenceValue)}>Any evidence</option>
+          </select></div>
+          <div class="field full"><label>Description / notes</label><textarea name="description" placeholder="Optional details">${escapeHtml(existing?.description || '')}</textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">${isEdit ? 'Save Changes' : 'Create Quest'}</button>
+          <button class="secondary-btn" type="button" data-cancel>Cancel</button>
+        </div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+
+      $('#questForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,isEdit ? 'Saving…' : 'Creating…');
+
+        const fd = new FormData(e.currentTarget);
+        const ev = String(fd.get('evidence_type') || '');
+        const editable = {
+          title: String(fd.get('title')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          category: fd.get('category'),
+          due_date: fd.get('due_date') || null,
+          due_time: fd.get('due_time') || null,
+          evidence_required: !!ev,
+          evidence_type: ev || 'any'
+        };
+
+        if (isEdit) {
+          const { error } = await db.from('quests').update(editable).eq('id',existing.id);
+          if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+          await logActivity({
+            action_type:'quest_updated',
+            quest_id:existing.id,
+            summary:'edited a quest',
+            details:{title:editable.title}
+          });
+          closeModal();
+          await loadAll({quiet:true});
+          toast('Quest updated.','success');
+          return;
+        }
+
+        const row = {
+          ...editable,
+          assigned_to: state.starProfile?.id || null,
+          assigned_by: state.actorProfile.id,
+          status: 'not_started'
+        };
+        const { data, error } = await db.from('quests').insert(row).select('id,title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({
+          action_type:'quest_created',
+          quest_id:data.id,
+          summary:'assigned a mission',
+          details:{title:data.title}
+        });
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Quest added to the orbit.','success');
+      });
+    });
+  }
+
+  async function deleteQuest(q) {
+    if (!confirm(`Delete "${q.title}" permanently? This cannot be undone.`)) return;
+
+    const btn = $('#deleteQuestBtn');
+    setBusy(btn,true,'Deleting…');
+    const paths = await storagePathsFor('quest_id', q.id);
+
+    let { error } = await db.from('quests').delete().eq('id',q.id);
+
+    if (error) {
+      await nullActivityReference('quest_id',q.id);
+      await bestEffortDelete('evidence','quest_id',q.id);
+      await bestEffortDelete('quest_comments','quest_id',q.id);
+      ({ error } = await db.from('quests').delete().eq('id',q.id));
+    }
+
+    if (error) {
+      setBusy(btn,false);
+      return toast(`Could not delete quest: ${error.message}`,'error');
+    }
+
+    await cleanupStorage(paths);
+    await logActivity({
+      action_type:'quest_deleted',
+      summary:'deleted a quest',
+      details:{title:q.title}
+    });
+    closeModal();
+    await loadAll({quiet:true});
+    toast(`Deleted: ${q.title}`,'success');
+  }
+
+  function showJobForm(existing=null) {
+    if (!state.actorProfile) return showIdentityPicker(true);
+
+    const isEdit = !!existing;
+    const statusValues = [...JOB_STATUSES];
+    if (existing?.status && !statusValues.includes(existing.status)) statusValues.unshift(existing.status);
+    const typeValues = [...EMPLOYMENT_TYPES];
+    if (existing?.employment_type && !typeValues.includes(existing.employment_type)) typeValues.unshift(existing.employment_type);
+
+    openModal(isEdit ? 'Edit Job Opportunity' : 'Add Job Opportunity', `
+      <form id="jobForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field"><label>Employer</label><input name="employer" required value="${escapeHtml(existing?.employer || '')}"></div>
+          <div class="field"><label>Position</label><input name="position_title" required value="${escapeHtml(existing?.position_title || '')}"></div>
+          <div class="field full"><label>Job link</label><input name="job_url" type="url" placeholder="https://…" value="${escapeHtml(existing?.job_url || '')}"></div>
+          <div class="field"><label>Location</label><input name="location_text" placeholder="City, state" value="${escapeHtml(existing?.location_text || '')}"></div>
+          <div class="field"><label>Employment type</label><select name="employment_type">
+            ${typeValues.map(v=>`<option value="${escapeHtml(v)}" ${selected(v,existing?.employment_type || 'other')}>${escapeHtml(v.replace('_',' '))}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>Status</label><select name="status">
+            ${statusValues.map(v=>`<option value="${escapeHtml(v)}" ${selected(v,existing?.status || 'opportunity')}>${escapeHtml(v.replace('_',' '))}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>Follow-up date</label><input name="follow_up_date" type="date" value="${escapeHtml(existing?.follow_up_date || '')}"></div>
+          <div class="field full"><label>Notes</label><textarea name="notes">${escapeHtml(existing?.notes || '')}</textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">${isEdit ? 'Save Changes' : 'Add Opportunity'}</button>
+          <button class="secondary-btn" type="button" data-cancel>Cancel</button>
+        </div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+
+      $('#jobForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,isEdit ? 'Saving…' : 'Adding…');
+
+        const fd = new FormData(e.currentTarget);
+        const editable = {
+          employer: String(fd.get('employer')).trim(),
+          position_title: String(fd.get('position_title')).trim(),
+          job_url: String(fd.get('job_url') || '').trim() || null,
+          location_text: String(fd.get('location_text') || '').trim() || null,
+          employment_type: fd.get('employment_type') || 'other',
+          status: fd.get('status') || 'opportunity',
+          follow_up_date: fd.get('follow_up_date') || null,
+          notes: String(fd.get('notes') || '').trim() || null
+        };
+
+        if (isEdit) {
+          const { error } = await db.from('jobs').update(editable).eq('id',existing.id);
+          if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+          await logActivity({
+            action_type:'job_updated',
+            job_id:existing.id,
+            summary:'edited a job opportunity',
+            details:{employer:editable.employer,title:editable.position_title}
+          });
+          closeModal();
+          await loadAll({quiet:true});
+          toast('Job opportunity updated.','success');
+          return;
+        }
+
+        const row = {
+          ...editable,
+          discovered_by: state.actorProfile.id,
+          assigned_to: state.starProfile?.id || null,
+          date_discovered: localISODate()
+        };
+        const { data, error } = await db.from('jobs').insert(row).select('id,employer,position_title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({
+          action_type:'job_added',
+          job_id:data.id,
+          summary:'added a job opportunity',
+          details:{employer:data.employer,title:data.position_title}
+        });
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Job opportunity added.','success');
+      });
+    });
+  }
+
+  function showJobManager(id) {
+    const j = jobById(id);
+    if (!j) return toast('Job opportunity not found.','error');
+
+    openModal('Manage Job Opportunity', `
+      <div class="manage-summary">
+        <b>${escapeHtml(j.employer)} · ${escapeHtml(j.position_title)}</b>
+        <p>${escapeHtml([j.location_text,j.employment_type?.replace('_',' '),j.status?.replace('_',' ')].filter(Boolean).join(' · '))}</p>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="editJobBtn" type="button">Edit Job</button>
+        <button class="secondary-btn" id="closeJobManager" type="button">Close</button>
+      </div>
+      <div class="danger-zone">
+        <b>Delete job opportunity</b>
+        <p>This permanently removes the job opportunity. Linked quests are preserved but detached from this job. Associated evidence is removed.</p>
+        <button class="danger-btn" id="deleteJobBtn" type="button">Delete Job</button>
+      </div>
+    `, () => {
+      $('#editJobBtn').onclick = () => showJobForm(j);
+      $('#closeJobManager').onclick = closeModal;
+      $('#deleteJobBtn').onclick = () => deleteJob(j);
+    });
+  }
+
+  async function deleteJob(j) {
+    if (!confirm(`Delete "${j.employer} · ${j.position_title}" permanently? This cannot be undone.`)) return;
+
+    const btn = $('#deleteJobBtn');
+    setBusy(btn,true,'Deleting…');
+    const paths = await storagePathsFor('job_id', j.id);
+
+    // Preserve any quests linked to this job rather than deleting those quests.
+    const { error: unlinkError } = await db.from('quests').update({job_id:null}).eq('job_id',j.id);
+    if (unlinkError) console.warn('Linked quest detach warning:', unlinkError.message);
+
+    let { error } = await db.from('jobs').delete().eq('id',j.id);
+
+    if (error) {
+      await nullActivityReference('job_id',j.id);
+      await bestEffortDelete('evidence','job_id',j.id);
+      await bestEffortDelete('job_contacts','job_id',j.id);
+      ({ error } = await db.from('jobs').delete().eq('id',j.id));
+    }
+
+    if (error) {
+      setBusy(btn,false);
+      return toast(`Could not delete job: ${error.message}`,'error');
+    }
+
+    await cleanupStorage(paths);
+    await logActivity({
+      action_type:'job_deleted',
+      summary:'deleted a job opportunity',
+      details:{employer:j.employer,title:j.position_title}
+    });
+    closeModal();
+    await loadAll({quiet:true});
+    toast('Job opportunity deleted.','success');
+  }
+
+  function showJobsModal(focusId=null) {
+    const rows = state.jobs.map(j => `
+      <div class="list-item" ${j.id===focusId?'style="border-color:#b93bfa"':''}>
+        <div class="list-item-head">
+          <div>
+            <b>${escapeHtml(j.employer)} · ${escapeHtml(j.position_title)}</b>
+            <p>${escapeHtml([j.location_text,j.employment_type?.replace('_',' '),j.follow_up_date?`Follow up ${formatDate(j.follow_up_date)}`:''].filter(Boolean).join(' · '))}</p>
+          </div>
+          <select class="status-select" data-job-status="${escapeHtml(j.id)}">
+            ${([...JOB_STATUSES,...(!JOB_STATUSES.includes(j.status)?[j.status]:[])]).filter((v,i,a)=>v && a.indexOf(v)===i).map(s=>`<option value="${escapeHtml(s)}" ${j.status===s?'selected':''}>${escapeHtml(s.replace('_',' '))}</option>`).join('')}
+          </select>
+        </div>
+        ${j.job_url?`<div style="margin-top:7px"><a class="small-link" href="${escapeHtml(j.job_url)}" target="_blank" rel="noopener">Open job listing ↗</a></div>`:''}
+        <div class="record-actions">
+          <button class="secondary-btn" type="button" data-edit-job="${escapeHtml(j.id)}">Edit</button>
+          <button class="danger-btn" type="button" data-delete-job="${escapeHtml(j.id)}">Delete</button>
+        </div>
+      </div>`).join('');
+
+    openModal('Job Hunt', `
+      <div class="modal-actions" style="margin:0 0 12px"><button class="primary-btn" type="button" id="modalAddJob">＋ Add Opportunity</button></div>
+      <div class="list-stack">${rows || '<div class="quest-list-empty">No jobs yet.</div>'}</div>
+    `, () => {
+      $('#modalAddJob').onclick = () => showJobForm();
+
+      $$('[data-job-status]',modalBody).forEach(sel => sel.addEventListener('change', async () => {
+        const job = state.jobs.find(j => j.id === sel.dataset.jobStatus);
+        const nextStatus = sel.value;
+        const { error } = await db.from('jobs').update({status:nextStatus}).eq('id',job.id);
+        if (error) { toast(error.message,'error'); return; }
+        await logActivity({
+          action_type:'job_status_updated',
+          job_id:job.id,
+          summary:'updated a job status',
+          details:{employer:job.employer,title:job.position_title,status:nextStatus}
+        });
+        await loadAll({quiet:true});
+        toast(`${job.employer}: ${nextStatus.replace('_',' ')}`,'success');
+      }));
+
+      $$('[data-edit-job]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => showJobForm(jobById(btn.dataset.editJob)))
+      );
+      $$('[data-delete-job]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => showJobManager(btn.dataset.deleteJob))
+      );
+    });
+  }
+
+  function showDocumentForm(existing=null) {
+    if (!state.actorProfile) return showIdentityPicker(true);
+    const isEdit = !!existing;
+    const types = ['resume','cover_letter','references','other'];
+    const typeValues = [...types];
+    if (existing?.document_type && !typeValues.includes(existing.document_type)) typeValues.unshift(existing.document_type);
+
+    openModal(isEdit ? 'Edit Key Document' : 'Add Key Document', `
+      <form id="documentForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Document title</label><input name="title" required value="${escapeHtml(existing?.title || '')}"></div>
+          <div class="field"><label>Type</label><select name="document_type">
+            ${typeValues.map(v=>`<option value="${escapeHtml(v)}" ${selected(v,existing?.document_type || 'other')}>${escapeHtml(v.replace('_',' '))}</option>`).join('')}
+          </select></div>
+          <div class="field full"><label>Document link</label><input name="url" type="url" required placeholder="https://…" value="${escapeHtml(existing?.url || '')}"></div>
+          <div class="field full"><label>Description</label><textarea name="description">${escapeHtml(existing?.description || '')}</textarea></div>
+          <label class="current-check full"><input name="is_current" type="checkbox" ${existing?.is_current===false?'':'checked'}> Keep this as a current document</label>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">${isEdit ? 'Save Changes' : 'Add Document'}</button>
+          <button class="secondary-btn" type="button" data-cancel>Cancel</button>
+        </div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+
+      $('#documentForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,isEdit ? 'Saving…' : 'Adding…');
+
+        const fd = new FormData(e.currentTarget);
+        const editable = {
+          title: String(fd.get('title')).trim(),
+          document_type: fd.get('document_type'),
+          url: String(fd.get('url')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          is_current: fd.get('is_current') === 'on'
+        };
+
+        if (isEdit) {
+          const { error } = await db.from('documents').update(editable).eq('id',existing.id);
+          if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+          await logActivity({
+            action_type:'document_updated',
+            document_id:existing.id,
+            summary:'edited a key document',
+            details:{document_title:editable.title}
+          });
+          closeModal();
+          await loadAll({quiet:true});
+          toast('Document updated.','success');
+          return;
+        }
+
+        const row = {...editable, added_by: state.actorProfile.id};
+        const { data, error } = await db.from('documents').insert(row).select('id,title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({
+          action_type:'document_added',
+          document_id:data.id,
+          summary:'added a key document',
+          details:{document_title:data.title}
+        });
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Document added to Inventory.','success');
+      });
+    });
+  }
+
+  function showDocumentManager(id) {
+    const d = documentById(id);
+    if (!d) return toast('Document not found.','error');
+
+    openModal('Manage Document', `
+      <div class="manage-summary">
+        <b>${escapeHtml(d.title)}</b>
+        <p>${escapeHtml([(d.document_type||'other').replace('_',' '),d.is_current===false?'Archived':'Current'].join(' · '))}</p>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="editDocumentBtn" type="button">Edit Document</button>
+        <button class="secondary-btn" id="closeDocumentManager" type="button">Close</button>
+      </div>
+      <div class="danger-zone">
+        <b>Delete document</b>
+        <p>This permanently removes the document record from Inventory. The external file or link itself is not deleted.</p>
+        <button class="danger-btn" id="deleteDocumentBtn" type="button">Delete Document</button>
+      </div>
+    `, () => {
+      $('#editDocumentBtn').onclick = () => showDocumentForm(d);
+      $('#closeDocumentManager').onclick = closeModal;
+      $('#deleteDocumentBtn').onclick = () => deleteDocument(d);
+    });
+  }
+
+  async function deleteDocument(d) {
+    if (!confirm(`Delete "${d.title}" from Inventory permanently?`)) return;
+
+    const btn = $('#deleteDocumentBtn');
+    setBusy(btn,true,'Deleting…');
+
+    let { error } = await db.from('documents').delete().eq('id',d.id);
+
+    if (error) {
+      await nullActivityReference('document_id',d.id);
+      ({ error } = await db.from('documents').delete().eq('id',d.id));
+    }
+
+    if (error) {
+      setBusy(btn,false);
+      return toast(`Could not delete document: ${error.message}`,'error');
+    }
+
+    await logActivity({
+      action_type:'document_deleted',
+      summary:'deleted a key document',
+      details:{document_title:d.title}
+    });
+    closeModal();
+    await loadAll({quiet:true});
+    toast('Document deleted.','success');
+  }
+
+  function showDocumentsModal() {
+    const rows = state.documents.map(d => `
+      <div class="list-item">
+        <div class="list-item-head">
+          <div><b>${escapeHtml(d.title)}</b><p>${escapeHtml((d.document_type||'other').replace('_',' '))}${d.description?` · ${escapeHtml(d.description)}`:''}</p></div>
+          <span class="badge">${d.is_current===false?'Archived':'Current'}</span>
+        </div>
+        <div style="margin-top:7px"><a class="small-link" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open document ↗</a></div>
+        <div class="record-actions">
+          <button class="secondary-btn" type="button" data-edit-document="${escapeHtml(d.id)}">Edit</button>
+          <button class="danger-btn" type="button" data-delete-document="${escapeHtml(d.id)}">Delete</button>
+        </div>
+      </div>`).join('');
+
+    openModal('Inventory', `
+      <div class="modal-actions" style="margin:0 0 12px"><button class="primary-btn" id="modalAddDocument" type="button">＋ Add Document</button></div>
+      <div class="list-stack">${rows || '<div class="quest-list-empty">No documents yet.</div>'}</div>
+    `, () => {
+      $('#modalAddDocument').onclick = () => showDocumentForm();
+      $$('[data-edit-document]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => showDocumentForm(documentById(btn.dataset.editDocument)))
+      );
+      $$('[data-delete-document]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => showDocumentManager(btn.dataset.deleteDocument))
+      );
     });
   }
 
