@@ -2,369 +2,1564 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Star's Galaxy</title>
 <style>
 :root{
-  --bg:#050711; --panel:#0b1020; --panel2:#11172a; --line:#2a3150;
-  --violet:#a82cff; --pink:#ed38ff; --blue:#5f8cff; --cyan:#72e9ff;
-  --green:#65efae; --yellow:#ffc857; --text:#f7f5ff; --muted:#aab1cb;
+  --bg:#050711;
+  --panel:#0b1020;
+  --panel2:#11172a;
+  --line:#2a3150;
+  --violet:#a82cff;
+  --pink:#ed38ff;
+  --cyan:#72e9ff;
+  --green:#65efae;
+  --yellow:#ffc857;
+  --text:#f7f5ff;
+  --muted:#aab1cb;
+  --sidebar:138px;
 }
 *{box-sizing:border-box}
+html{background:var(--bg)}
 body{
-  margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  min-height:100vh;background:
-  radial-gradient(circle at 67% 0%,#291151 0,transparent 25%),
-  radial-gradient(circle at 44% 85%,#151047 0,transparent 27%),#050711;
+  margin:0;
+  min-height:100vh;
+  overflow-x:hidden;
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 70% 0%,#291151 0,transparent 27%),
+    radial-gradient(circle at 45% 82%,#151047 0,transparent 29%),
+    #050711;
 }
-body:before{
-  content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;
-  background-image:radial-gradient(#fff 1px,transparent 1px);background-size:76px 76px
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.22;
+  background-image:radial-gradient(#fff 1px,transparent 1px);
+  background-size:76px 76px;
 }
-.app{display:grid;grid-template-columns:218px 1fr;min-height:100vh}
+button{font:inherit}
+
+/* SIDEBAR */
 .sidebar{
-  position:fixed;z-index:20;width:218px;height:100vh;border-right:1px solid #282344;
-  background:linear-gradient(180deg,rgba(5,6,16,.99),rgba(8,8,22,.97));overflow:hidden
+  position:fixed;
+  inset:0 auto 0 0;
+  z-index:20;
+  width:var(--sidebar);
+  height:100vh;
+  overflow:hidden;
+  border-right:1px solid #282344;
+  background:linear-gradient(180deg,rgba(5,6,16,.99),rgba(8,8,22,.98));
 }
 .side-art{
-  position:absolute;inset:auto 0 0;height:48%;
-  background:linear-gradient(180deg,#07081400 0,#070814bb 53%,#070814 92%),url('assets/purple-art.jpg') center/cover;
-  opacity:.67
+  position:absolute;
+  inset:auto 0 0;
+  height:46%;
+  pointer-events:none;
+  opacity:.68;
+  background:
+    linear-gradient(180deg,#07081400 0,#070814b8 52%,#070814 94%),
+    url('assets/purple-art.jpg') center/cover;
 }
-.brand{position:relative;z-index:2;padding:26px 20px 20px;font-weight:1000;font-style:italic;line-height:.82;font-size:22px;text-shadow:0 0 18px #c12cff}
-.brand span{display:block;font-size:30px;color:#d830ff}
-.nav{position:relative;z-index:2;padding:0 13px;display:grid;gap:6px}
-.nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:#c7cade;text-decoration:none;font-size:13px}
-.nav a.active{color:white;background:linear-gradient(90deg,#9d27f43d,#6b25a629);border:1px solid #7433bc;box-shadow:inset 3px 0 #d42cff,0 0 18px #7c2cff1f}
-.nav b{font-size:18px;width:20px;text-align:center}.nav small{color:#a7acc2}
-.side-quote{position:absolute;z-index:3;bottom:27px;left:21px;font-family:cursive;color:#f094ff;font-size:20px;line-height:1.2;transform:rotate(-5deg);text-shadow:0 0 14px #d12cff}
-.main{grid-column:2;max-width:1530px;width:100%;margin:auto;padding:0 22px 34px}
+.brand{
+  position:relative;
+  z-index:2;
+  padding:20px 14px 15px;
+  font-weight:1000;
+  font-style:italic;
+  line-height:.82;
+  font-size:18px;
+  letter-spacing:-.5px;
+  text-shadow:0 0 18px #c12cff;
+}
+.brand span{display:block;font-size:26px;color:#d830ff}
+.nav{position:relative;z-index:2;padding:0 9px;display:grid;gap:5px}
+.nav a{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  padding:8px 9px;
+  border:1px solid transparent;
+  border-radius:10px;
+  color:#c7cade;
+  text-decoration:none;
+  font-size:11px;
+  line-height:1.08;
+}
+.nav a.active{
+  color:#fff;
+  background:linear-gradient(90deg,#9d27f43d,#6b25a629);
+  border-color:#7433bc;
+  box-shadow:inset 3px 0 #d42cff,0 0 18px #7c2cff1f;
+}
+.nav b{width:16px;text-align:center;font-size:14px}
+.nav small{font-size:9px;color:#a7acc2}
+.side-quote{
+  position:absolute;
+  z-index:3;
+  left:14px;
+  bottom:20px;
+  transform:rotate(-5deg);
+  color:#f094ff;
+  font-family:cursive;
+  font-size:15px;
+  line-height:1.15;
+  text-shadow:0 0 14px #d12cff;
+}
+
+/* PAGE */
+.main{
+  margin-left:var(--sidebar);
+  width:calc(100% - var(--sidebar));
+  min-width:0;
+  padding:10px 16px 30px;
+}
+.content{width:100%;max-width:1580px;margin:0 auto}
 
 /* HERO */
 .hero{
-  height:245px;margin:0 -22px 15px;position:relative;overflow:hidden;border-bottom:1px solid #553481;
-  background:url('assets/genshin.png') center 52%/cover
+  position:relative;
+  height:208px;
+  overflow:hidden;
+  margin-bottom:12px;
+  border:1px solid #34274f;
+  border-radius:18px;
+  background:url('assets/genshin.png') center 46%/cover no-repeat;
+  box-shadow:0 14px 34px #0005;
 }
-.hero:before{
-  content:"";position:absolute;inset:0;
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
   background:
-    linear-gradient(90deg,#070916 0%,rgba(7,9,22,.28) 22%,rgba(7,9,22,.05) 60%,#070916 100%),
-    linear-gradient(0deg,#070916 0%,transparent 46%);
+    linear-gradient(90deg,rgba(5,7,17,.92) 0%,rgba(5,7,17,.50) 34%,rgba(5,7,17,.08) 64%,rgba(5,7,17,.42) 100%),
+    linear-gradient(0deg,rgba(5,7,17,.92) 0%,transparent 43%);
 }
-.hero:after{
-  content:"";position:absolute;right:4%;bottom:-15px;width:285px;height:285px;border-radius:50%;
-  background:radial-gradient(circle,#cf37ff2e 0,#7a2cff12 42%,transparent 70%);filter:blur(1px)
+.hero::after{
+  content:"";
+  position:absolute;
+  right:26px;
+  bottom:-45px;
+  width:245px;
+  height:245px;
+  border-radius:50%;
+  background:radial-gradient(circle,#cf37ff30 0,#7a2cff10 45%,transparent 72%);
 }
-.hero-copy{position:absolute;z-index:4;left:28px;top:49px}
-.eyebrow{font-size:11px;font-weight:900;letter-spacing:2.4px;color:#d69bff;margin-bottom:8px}
-.logo{font-size:52px;font-weight:1000;font-style:italic;line-height:.78;letter-spacing:-3.5px;text-transform:uppercase;text-shadow:0 0 23px #a72cff}
+.hero-copy{position:absolute;z-index:4;left:24px;top:34px}
+.eyebrow{margin-bottom:8px;color:#d69bff;font-size:10px;font-weight:900;letter-spacing:2.2px}
+.logo{
+  font-size:44px;
+  font-weight:1000;
+  font-style:italic;
+  line-height:.8;
+  letter-spacing:-3px;
+  text-transform:uppercase;
+  text-shadow:0 0 23px #a72cff;
+}
 .logo span{display:block;color:#dc35ff}
-.status{margin-top:17px;font-size:13px;font-weight:900;letter-spacing:2px}.status em{font-style:normal;color:#e44aff}
-.hero-character{
-  position:absolute;z-index:3;right:9%;bottom:-56px;width:255px;height:255px;border-radius:50%;
-  object-fit:cover;object-position:center 22%;border:2px solid #d449ff;
-  box-shadow:0 0 0 8px #8f2cff18,0 0 48px #bb32ff66;
+.status{margin-top:14px;font-size:11px;font-weight:900;letter-spacing:1.8px}
+.status em{font-style:normal;color:#e44aff}
+.hero-date{
+  position:absolute;
+  z-index:6;
+  top:16px;
+  right:20px;
+  color:#ebe8f7;
+  font-size:10px;
+  font-weight:750;
+  letter-spacing:.9px;
+  text-shadow:0 1px 5px #000;
 }
-.hero-character-ring{position:absolute;z-index:2;right:7.3%;bottom:-74px;width:300px;height:300px;border-radius:50%;border:1px solid #bd48ff55;box-shadow:0 0 40px #a52cff33}
-.hero-date{position:absolute;z-index:5;right:24px;top:20px;font-size:11px;letter-spacing:.7px;color:#e0dff0}
-.hero-tag{position:absolute;z-index:5;right:32px;bottom:20px;background:#090d1ad9;border:1px solid #56347a;border-radius:999px;padding:8px 13px;font-size:10px;color:#c9cce0}
+.hero-character-ring{
+  position:absolute;
+  z-index:2;
+  right:26px;
+  bottom:2px;
+  width:194px;
+  height:194px;
+  border:1px solid #bd48ff66;
+  border-radius:50%;
+  box-shadow:0 0 40px #a52cff33;
+}
+.hero-character{
+  position:absolute;
+  z-index:4;
+  right:37px;
+  bottom:13px;
+  width:172px;
+  height:172px;
+  object-fit:cover;
+  object-position:center 18%;
+  border:3px solid #d449ff;
+  border-radius:50%;
+  box-shadow:0 0 0 6px #8f2cff18,0 0 42px #bb32ff66;
+}
+.hero-tag{
+  position:absolute;
+  z-index:5;
+  right:224px;
+  bottom:16px;
+  padding:7px 10px;
+  border:1px solid #56347a;
+  border-radius:999px;
+  background:#090d1ad9;
+  color:#c9cce0;
+  font-size:9px;
+  white-space:nowrap;
+}
 .hero-tag b{color:#70f0b0}
 
 /* TOP STRIP */
-.stats{display:grid;grid-template-columns:repeat(4,1fr) 170px;gap:12px;margin-bottom:14px}
-.stat,.panel,.destination{background:linear-gradient(180deg,rgba(16,22,40,.96),rgba(8,12,24,.97));border:1px solid #2c3453;box-shadow:0 10px 30px #0006}
-.stat{min-height:77px;border-radius:13px;padding:12px 15px;display:flex;gap:13px;align-items:center}
-.stat .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#8428d92b;color:#d048ff;font-size:21px;border:1px solid #843bb05c}
-.stat:nth-child(2) .ico{color:#6f9cff;background:#294c9a2b}.stat:nth-child(3) .ico{color:#70e7ff;background:#2a86952b}.stat:nth-child(4) .ico{color:#ffc95d;background:#9a73292b}
-.num{font-size:24px;font-weight:950;line-height:1}.label{font-size:11px;font-weight:850;margin-top:3px}.sub{font-size:9.5px;color:var(--muted);margin-top:2px}
-.add{border:2px solid #e23cff;border-radius:13px;background:linear-gradient(135deg,#8126e6,#d629ed);color:white;font-size:17px;font-weight:950;box-shadow:0 0 20px #d82cff88}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr)) 92px;
+  gap:10px;
+  width:100%;
+  margin-bottom:12px;
+}
+.stat,.panel,.destination,.memory-card{
+  background:linear-gradient(180deg,rgba(16,22,40,.96),rgba(8,12,24,.97));
+  border:1px solid #2c3453;
+  box-shadow:0 10px 28px #0005;
+}
+.stat{
+  min-width:0;
+  min-height:68px;
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-radius:12px;
+}
+.stat .ico{
+  flex:0 0 33px;
+  width:33px;
+  height:33px;
+  display:grid;
+  place-items:center;
+  border:1px solid #843bb05c;
+  border-radius:9px;
+  background:#8428d92b;
+  color:#d048ff;
+  font-size:17px;
+}
+.stat:nth-child(2) .ico{color:#6f9cff;background:#294c9a2b}
+.stat:nth-child(3) .ico{color:#70e7ff;background:#2a86952b}
+.stat:nth-child(4) .ico{color:#ffc95d;background:#9a73292b}
+.num{font-size:20px;font-weight:950;line-height:1}
+.label{margin-top:2px;font-size:10px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{margin-top:2px;color:var(--muted);font-size:8.5px}
+.add{
+  min-width:0;
+  border:2px solid #e23cff;
+  border-radius:12px;
+  background:linear-gradient(135deg,#8126e6,#d629ed);
+  color:white;
+  font-size:13px;
+  font-weight:950;
+  box-shadow:0 0 18px #d82cff66;
+  cursor:pointer;
+}
 
-/* CONTENT */
-.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(340px,.95fr);gap:14px}
-.panel{border-radius:14px;padding:14px}
-.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}.panel-title h2{margin:0;font-size:17px}.panel-title small{color:#db4cff}
-.orbit-head{display:flex;align-items:center;gap:11px}.orbit-icon{font-size:29px;color:#c83cff}.orbit-head h2{font-size:18px}
-.progress{margin-left:auto;width:205px;height:9px;border-radius:8px;background:#28314a;overflow:hidden}.progress i{display:block;width:40%;height:100%;border-radius:8px;background:linear-gradient(90deg,#65efae,#70e8d7)}
-.tabs{display:flex;gap:7px;margin:11px 0}.tab{flex:1;padding:8px;border-radius:8px;background:#161d32;text-align:center;font-size:11px;color:#cdd0e1}.tab.active{font-weight:850;color:#fff;background:linear-gradient(90deg,#8c29eb,#d52cf0)}
-.quest{display:grid;grid-template-columns:32px 1fr auto auto;gap:9px;align-items:center;padding:10px 9px;margin-top:7px;border-radius:9px;border:1px solid #28304a;background:#09101d}
-.check{width:23px;height:23px;border:2px solid #717994;border-radius:4px;display:grid;place-items:center}.check.done{background:#65efae;color:#06140e;border-color:#65efae}
-.quest strong{font-size:12px}.tag{display:inline-block;font-size:8px;padding:2px 7px;margin-top:3px;border:1px solid #445075;border-radius:9px;color:#c9cde1}.meta{font-size:9px;color:#c1c5d8}.action{padding:7px 10px;border:1px solid #b52cff;border-radius:7px;color:#efb7ff;font-size:9px;box-shadow:0 0 10px #b32cff40}
-.jobs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.jobstat{padding:9px 5px;text-align:center;border-radius:8px;background:#151b31;border:1px solid #333b5d}.jobstat b{display:block;font-size:18px}.jobstat small{font-size:8px}
-.next{margin-top:11px;padding:11px;border-radius:9px;background:#11182a;border:1px solid #303957}.target-logo{width:45px;height:45px;border-radius:8px;background:#e31837;color:white;display:grid;place-items:center;font-size:25px;font-weight:1000;float:left;margin-right:11px}
-.crew{margin-top:14px}.crew-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #242b42}.crew-row:last-child{border-bottom:0}.crew-row img{width:31px;height:31px;border-radius:50%;object-fit:cover;border:1px solid #8741c3}.crew-row b{font-size:11px}.crew-row small{display:block;color:#989fb8;font-size:9px}.online{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#65efae;box-shadow:0 0 8px #65efae}
-.transmission{margin-top:14px}.activity{display:grid;grid-template-columns:29px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #252b43;font-size:10px}.activity img{width:27px;height:27px;border-radius:50%;object-fit:cover}.activity time{color:#9fa6c0}
+/* DASHBOARD */
+.grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.78fr) minmax(320px,.78fr);
+  align-items:start;
+  gap:12px;
+  width:100%;
+}
+.grid>*{min-width:0}
+.panel{min-width:0;border-radius:13px;padding:12px}
+.orbit-panel{align-self:start}
+.orbit-head{display:flex;align-items:center;gap:9px;min-width:0}
+.orbit-icon{flex:0 0 auto;color:#c83cff;font-size:24px}
+.orbit-head h2{margin:0;font-size:16px}
+.progress{
+  width:clamp(130px,16vw,220px);
+  height:7px;
+  margin-left:auto;
+  overflow:hidden;
+  border-radius:8px;
+  background:#28314a;
+}
+.progress i{display:block;width:40%;height:100%;border-radius:8px;background:linear-gradient(90deg,#65efae,#70e8d7)}
+.progress-label{font-size:9px;white-space:nowrap}
+.tabs{display:flex;gap:6px;margin:9px 0}
+.tab{flex:1;padding:7px;border-radius:7px;background:#161d32;text-align:center;color:#cdd0e1;font-size:9px}
+.tab.active{font-weight:850;color:#fff;background:linear-gradient(90deg,#8c29eb,#d52cf0)}
+.quest{
+  display:grid;
+  grid-template-columns:25px minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:8px;
+  min-height:48px;
+  margin-top:6px;
+  padding:8px;
+  border:1px solid #28304a;
+  border-radius:8px;
+  background:#09101d;
+}
+.check{width:20px;height:20px;display:grid;place-items:center;border:1.5px solid #717994;border-radius:4px;font-size:11px}
+.check.done{border-color:#65efae;background:#65efae;color:#06140e}
+.quest strong{font-size:10.5px}
+.tag{display:inline-block;margin-top:2px;padding:1px 6px;border:1px solid #445075;border-radius:9px;color:#c9cde1;font-size:7px}
+.meta{color:#c1c5d8;font-size:7.8px;white-space:nowrap}
+.action{padding:6px 8px;border:1px solid #b52cff;border-radius:6px;color:#efb7ff;font-size:8px;white-space:nowrap;box-shadow:0 0 10px #b32cff35}
 
-/* DESTINATIONS */
-.destinations{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
-.destination{height:126px;border-radius:14px;position:relative;overflow:hidden;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:15px}
-.destination:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#070a15 3%,#070a1580 55%,transparent)}
-.destination:after{content:"→";position:absolute;right:13px;bottom:15px;width:29px;height:29px;border-radius:50%;display:grid;place-items:center;border:1px solid #d54cff;color:#fff;background:#090c18cc}
-.destination>div{position:relative;z-index:2}.destination h3{margin:0;font-size:16px}.destination p{margin:2px 0 0;font-size:10px;color:#d4d6e1}
-.destination:nth-child(1){background-image:url('assets/fortnite.png')}.destination:nth-child(2){background-image:url('assets/tedx.jpg')}.destination:nth-child(3){background-image:url('assets/graduation.jpg')}.destination:nth-child(4){background-image:url('assets/fire-art.jpg')}
+.right-rail{display:grid;align-content:start;gap:10px}
+.panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.panel-title h2{margin:0;font-size:15px}
+.panel-title small{color:#db4cff;font-size:9px;white-space:nowrap}
+.jobs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.jobstat{min-width:0;padding:7px 3px;text-align:center;border:1px solid #333b5d;border-radius:7px;background:#151b31}
+.jobstat b{display:block;font-size:15px}
+.jobstat small{font-size:6.8px}
+.next{margin-top:8px;padding:8px;border:1px solid #303957;border-radius:8px;background:#11182a;min-height:58px}
+.target-logo{float:left;width:38px;height:38px;margin-right:9px;display:grid;place-items:center;border-radius:7px;background:#e31837;color:white;font-size:21px;font-weight:1000}
+.next b{font-size:10px}.next strong{font-size:10px}.next .sub{font-size:7.4px}
+.crew-row{display:flex;align-items:center;gap:8px;min-height:31px;padding:4px 0;border-bottom:1px solid #242b42}
+.crew-row:last-child{border-bottom:0}
+.crew-row img{width:25px;height:25px;object-fit:cover;border:1px solid #8741c3;border-radius:50%}
+.crew-row b{font-size:9px}.crew-row small{display:block;color:#989fb8;font-size:7px}
+.online{margin-left:auto;width:6px;height:6px;border-radius:50%;background:#65efae;box-shadow:0 0 7px #65efae}
+.activity{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:7px;min-height:32px;padding:4px 0;border-bottom:1px solid #252b43;font-size:8px}
+.activity:last-child{border-bottom:0}
+.activity img{width:23px;height:23px;object-fit:cover;border-radius:50%}
+.activity time{color:#9fa6c0;font-size:7px;white-space:nowrap}
 
-/* MEMORY STRIP */
-.memory{margin-top:14px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}
-.memory-card{height:108px;border-radius:13px;overflow:hidden;position:relative;border:1px solid #303653;background-size:cover;background-position:center}
-.memory-card:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080b18e8 0,#080b1880 48%,transparent)}
-.memory-card div{position:absolute;z-index:2;left:15px;bottom:14px}.memory-card b{display:block;font-size:13px}.memory-card span{font-size:9px;color:#c8cbd9}
-.memory-card:nth-child(1){background-image:url('assets/childhood.jpg');background-position:center 34%}.memory-card:nth-child(2){background-image:url('assets/tedx.jpg')}.memory-card:nth-child(3){background-image:url('assets/graduation.jpg')}
-@media(max-width:1050px){.app{grid-template-columns:78px 1fr}.sidebar{width:78px}.brand,.nav span,.side-quote{display:none}.nav a{justify-content:center}.main{grid-column:2}.hero-character,.hero-character-ring{right:3%}.stats{grid-template-columns:repeat(2,1fr)}.add{min-height:65px}.grid{grid-template-columns:1fr}.destinations{grid-template-columns:repeat(2,1fr)}.memory{grid-template-columns:1fr}}
+/* PRIMARY DESTINATIONS */
+.destinations{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.destination{
+  position:relative;
+  min-width:0;
+  height:98px;
+  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
+  padding:12px;
+  border-radius:13px;
+  background-position:center;
+  background-size:cover;
+}
+.destination::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#070a15 4%,#070a1585 52%,transparent)}
+.destination::after{content:"→";position:absolute;right:11px;bottom:11px;width:25px;height:25px;display:grid;place-items:center;border:1px solid #d54cff;border-radius:50%;background:#090c18cc;color:#fff;font-size:11px}
+.destination>div{position:relative;z-index:2}
+.destination h3{margin:0;font-size:13px}
+.destination p{margin:1px 0 0;color:#d4d6e1;font-size:8px}
+.destination:nth-child(1){background-image:url('assets/fortnite.png')}
+.destination:nth-child(2){background-image:url('assets/tedx.jpg');background-position:center 15%}
+.destination:nth-child(3){background-image:url('assets/graduation.jpg');background-position:center 25%}
+.destination:nth-child(4){background-image:url('assets/fire-art.jpg');background-position:center 20%}
+
+/* JOURNEY */
+.memory{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-top:10px}
+.memory-card{position:relative;height:88px;overflow:hidden;border-radius:12px;background-position:center;background-size:cover}
+.memory-card::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080b18e8 0,#080b1888 48%,transparent)}
+.memory-card div{position:absolute;z-index:2;left:12px;bottom:11px}
+.memory-card b{display:block;font-size:10px}
+.memory-card span{color:#c8cbd9;font-size:7.5px}
+.memory-card:nth-child(1){background-image:url('assets/childhood.jpg');background-position:center 34%}
+.memory-card:nth-child(2){background-image:url('assets/tedx.jpg');background-position:center 15%}
+.memory-card:nth-child(3){background-image:url('assets/graduation.jpg');background-position:center 25%}
+
+/* RESPONSIVE */
+@media(max-width:1180px){
+  :root{--sidebar:126px}
+  .brand{font-size:16px}.brand span{font-size:23px}
+  .grid{grid-template-columns:minmax(0,1.6fr) minmax(300px,.82fr)}
+  .hero-character{width:158px;height:158px;right:28px;bottom:16px}
+  .hero-character-ring{width:180px;height:180px;right:17px;bottom:5px}
+  .hero-tag{right:200px}
+  .quest{grid-template-columns:24px minmax(0,1fr) auto}
+  .quest .meta{grid-column:2;white-space:normal}
+  .quest .action{grid-column:3;grid-row:1 / span 2}
+}
+@media(max-width:960px){
+  :root{--sidebar:76px}
+  .brand{padding:18px 6px;font-size:0}.brand span{font-size:18px;text-align:center}
+  .nav{padding:0 7px}.nav a{justify-content:center}.nav span,.side-quote{display:none}
+  .main{padding:8px 10px 24px}
+  .hero{height:190px}.logo{font-size:38px}
+  .hero-character{width:142px;height:142px}.hero-character-ring{width:162px;height:162px}
+  .hero-tag{display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr)) 80px}
+  .add{grid-row:span 2}
+  .grid{grid-template-columns:1fr}
+  .right-rail{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  .jobs{grid-template-columns:repeat(2,1fr)}
+  .crew-row{min-height:29px}
+  .destinations{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .memory{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  :root{--sidebar:0px}
+  .sidebar{display:none}
+  .main{margin-left:0;width:100%;padding:8px}
+  .hero{height:170px}.hero-copy{left:16px;top:28px}.eyebrow{font-size:8px;letter-spacing:1.5px}.logo{font-size:31px}.status{font-size:9px}
+  .hero-date{right:12px;top:11px;font-size:8px}
+  .hero-character{width:112px;height:112px;right:14px;bottom:12px}.hero-character-ring{width:130px;height:130px;right:5px;bottom:3px}
+  .stats{grid-template-columns:1fr 1fr}.add{grid-column:1 / -1;grid-row:auto;min-height:46px}
+  .right-rail{grid-template-columns:1fr}
+  .orbit-head{flex-wrap:wrap}.progress{order:3;margin-left:34px;width:55%}
+  .quest{grid-template-columns:24px minmax(0,1fr)}
+  .quest .meta,.quest .action{grid-column:2;grid-row:auto;justify-self:start}
+  .destinations{grid-template-columns:1fr 1fr}
+}
 </style>
 
+<style id="live-functionality-v1">
+/* FUNCTIONAL LAYER ONLY — existing visual system intentionally preserved */
+.is-hidden{display:none!important}
+button,.destination,.nav a,.panel-title small,.hero-tag{cursor:pointer}
+.tab{border:0;font:inherit}
+.action,.check{background:transparent;font:inherit;cursor:pointer}
+.check:disabled,.action:disabled{cursor:not-allowed;opacity:.55}
+.quest-list-empty{
+  min-height:82px;display:grid;place-items:center;text-align:center;
+  border:1px dashed #303957;border-radius:9px;color:var(--muted);font-size:9px;padding:18px
+}
+.loading-line{opacity:.65;animation:pulse 1.15s ease-in-out infinite alternate}
+@keyframes pulse{to{opacity:.3}}
+.crew-dot{
+  margin-left:auto;width:6px;height:6px;border-radius:50%;
+  background:#4b526a;box-shadow:none
+}
+.crew-dot.current{background:#65efae;box-shadow:0 0 7px #65efae}
+.identity-name{color:#fff}
+.hero-tag{user-select:none}
+.hero-tag:focus,.destination:focus,.nav a:focus,.panel-title small:focus{outline:2px solid #c945ff;outline-offset:2px}
 
+/* AUTH GATE */
+.auth-gate{
+  position:fixed;z-index:1000;inset:0;display:grid;place-items:center;padding:24px;
+  background:rgba(3,5,13,.87);backdrop-filter:blur(9px)
+}
+.auth-card{
+  width:min(520px,100%);padding:26px;border:1px solid #4d386d;border-radius:20px;
+  background:linear-gradient(180deg,#10162af7,#070b17fa);
+  box-shadow:0 28px 80px #000b,0 0 45px #9d2cff29
+}
+.auth-logo{font-size:34px;font-weight:1000;font-style:italic;line-height:.82;letter-spacing:-2px;text-shadow:0 0 20px #a72cff}
+.auth-logo span{display:block;color:#dc35ff}
+.auth-kicker{margin-top:18px;color:#d69bff;font-size:9px;font-weight:900;letter-spacing:2px}
+.auth-card h1{margin:8px 0 6px;font-size:20px}
+.auth-card p{margin:0 0 16px;color:#aab1cb;font-size:11px;line-height:1.5}
+.auth-form{display:grid;gap:10px}
+.field{display:grid;gap:5px}
+.field label{font-size:8px;font-weight:850;letter-spacing:.7px;color:#c9cce1;text-transform:uppercase}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid #343d60;border-radius:9px;padding:10px 11px;
+  background:#080e1b;color:#fff;font:inherit;font-size:11px;outline:none
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#b839f5;box-shadow:0 0 0 2px #b839f522}
+.field textarea{min-height:86px;resize:vertical}
+.auth-actions,.modal-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.primary-btn,.secondary-btn,.danger-btn{
+  border-radius:9px;padding:9px 12px;font-size:10px;font-weight:850;cursor:pointer
+}
+.primary-btn{border:1px solid #d53cff;background:linear-gradient(135deg,#8126e6,#d629ed);color:#fff}
+.secondary-btn{border:1px solid #424b70;background:#11182a;color:#e8e8f4}
+.danger-btn{border:1px solid #8c3652;background:#351321;color:#ffb4c5}
+.text-btn{border:0;background:transparent;color:#de6cff;font-size:9px;cursor:pointer;padding:3px 0}
+.auth-note{margin-top:12px!important;font-size:9px!important;color:#8992ad!important}
+.auth-message{min-height:17px;margin-top:9px;color:#82eeb7;font-size:9px}
+.auth-message.error{color:#ff8da6}
+.auth-card button:disabled,.modal-card button:disabled{opacity:.55;cursor:not-allowed}
 
-
-<style id="visual-pass-4">
-/* VISUAL PASS 4: surgical correction and final visual system */
-*{box-sizing:border-box}
-html,body{max-width:100%;overflow-x:hidden}
-body{margin:0}
-.sidebar{
-  width:168px!important;
-  position:fixed!important;
-  left:0!important;top:0!important;bottom:0!important;
-  overflow:hidden!important
+/* MODALS */
+.modal-backdrop{
+  position:fixed;z-index:900;inset:0;display:grid;place-items:center;padding:22px;
+  background:rgba(2,4,11,.78);backdrop-filter:blur(6px)
 }
-.main,.main-content,main{
-  margin-left:168px!important;
-  width:calc(100% - 168px)!important;
-  max-width:calc(100% - 168px)!important;
-  overflow:hidden!important
+.modal-card{
+  width:min(670px,100%);max-height:min(82vh,760px);overflow:auto;
+  border:1px solid #40496e;border-radius:17px;padding:18px;
+  background:linear-gradient(180deg,#10162afc,#080d19fc);
+  box-shadow:0 28px 80px #000b,0 0 35px #8f2cff25
 }
-.content,.dashboard,.page-content{
-  width:100%!important;
-  max-width:1500px!important;
-  margin:0 auto!important;
-  padding:0 22px 34px!important
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.modal-head h2{margin:0;font-size:16px}
+.modal-close{width:30px;height:30px;border:1px solid #3d4668;border-radius:8px;background:#11172a;color:#fff;cursor:pointer}
+.modal-body{font-size:10px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-grid .full{grid-column:1/-1}
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.choice{
+  min-height:105px;padding:14px;border:1px solid #35405f;border-radius:12px;
+  background:#0b1222;color:#fff;text-align:left;cursor:pointer
 }
-
-/* HERO */
-.hero,.top-hero,.banner{
-  min-height:220px!important;
-  width:100%!important;
-  position:relative!important;
-  overflow:hidden!important;
-  border-radius:0 0 22px 22px!important;
-  background-size:cover!important;
-  background-position:center 43%!important;
-  filter:none!important
+.choice:hover{border-color:#b93bfa;box-shadow:0 0 18px #a82cff22}
+.choice b{display:block;font-size:12px;margin-bottom:4px}.choice span{color:#aab1cb;font-size:9px}
+.identity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.identity-choice{
+  display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #35405f;
+  border-radius:10px;background:#0b1222;color:#fff;cursor:pointer;text-align:left
 }
-.hero:before,.top-hero:before,.banner:before{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(90deg,rgba(4,6,18,.91) 0%,rgba(4,6,18,.54) 42%,rgba(4,6,18,.12) 68%,rgba(4,6,18,.48) 100%);
-  pointer-events:none
+.identity-choice:hover{border-color:#b93bfa}
+.identity-choice img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.identity-choice b{display:block;font-size:10px}.identity-choice small{font-size:8px;color:#9ea6c1}
+.list-stack{display:grid;gap:8px}
+.list-item{
+  padding:10px;border:1px solid #2e3857;border-radius:10px;background:#09101d
 }
-.hero>* ,.top-hero>* ,.banner>*{position:relative;z-index:1}
-.hero h1,.banner h1{
-  font-size:3.15rem!important;
-  line-height:.92!important;
-  letter-spacing:-.045em!important;
-  max-width:620px!important
+.list-item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.list-item b{font-size:10px}.list-item p{margin:4px 0 0;color:#aab1cb;font-size:8.5px;line-height:1.45}
+.status-select{
+  border:1px solid #404b70;border-radius:7px;padding:5px 7px;background:#11182a;color:#fff;font-size:8px
 }
-.hero .eyebrow,.banner .eyebrow{
-  font-size:.72rem!important;
-  letter-spacing:.22em!important
+.badge{display:inline-block;padding:2px 6px;border:1px solid #445075;border-radius:999px;color:#cbd0e3;font-size:7px}
+.small-link{color:#de6cff;text-decoration:none;font-size:8px}
+.small-link:hover{text-decoration:underline}
+.toast-wrap{position:fixed;z-index:1200;right:18px;bottom:18px;display:grid;gap:8px;width:min(330px,calc(100vw - 36px))}
+.toast{
+  padding:10px 12px;border:1px solid #3d496a;border-radius:10px;background:#0d1425f2;color:#f5f4ff;
+  font-size:9px;box-shadow:0 14px 35px #0009
 }
-.hero img,.hero-avatar,.player-portrait{
-  width:158px!important;height:158px!important;
-  max-width:158px!important;
-  object-fit:cover!important;border-radius:50%!important;
-  right:42px!important;
-  transform:none!important;
-  box-shadow:0 0 0 5px rgba(190,67,255,.72),0 0 42px rgba(196,61,255,.42)!important
-}
-
-/* METRICS */
-.stats,.stat-grid,.summary-grid{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr)) auto!important;
-  gap:12px!important;
-  width:100%!important;
-  margin:14px 0!important
-}
-.stat-card,.metric-card{
-  min-width:0!important;
-  min-height:78px!important;
-  padding:14px 16px!important;
-  border-radius:15px!important
-}
-
-/* MAIN GRID */
-.dashboard-grid,.main-grid{
-  display:grid!important;
-  grid-template-columns:minmax(0,1.82fr) minmax(315px,.78fr)!important;
-  gap:14px!important;
-  width:100%!important
-}
-.dashboard-grid>* ,.main-grid>*{min-width:0!important}
-.orbit,.today-orbit{
-  min-height:0!important;
-  height:auto!important;
-  padding:16px!important;
-  border-radius:17px!important
-}
-.quest-row,.task-row{
-  min-height:58px!important;
-  height:auto!important;
-  padding:10px 12px!important
-}
-.right-column,.side-column{min-width:0!important}
-.right-column .panel,.side-panel{padding:15px!important}
-
-/* DESTINATIONS */
-.destination-grid,.nav-cards,.feature-cards{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:12px!important;
-  width:100%!important;
-  margin:14px 0!important
-}
-.destination-card,.nav-card,.feature-card{
-  min-width:0!important;
-  min-height:108px!important;
-  border-radius:17px!important;
-  overflow:hidden!important;
-  background-size:cover!important;
-  background-position:center!important
-}
-
-/* Turn existing biography cards into a distinct journey block */
-.history-grid,.journey-grid,.journey-strip{
-  display:grid!important;
-  grid-template-columns:1.15fr 1fr 1fr!important;
-  gap:12px!important;
-  width:100%!important;
-  margin:0 0 30px!important;
-  padding-top:52px!important;
-  position:relative!important
-}
-.history-grid:before,.journey-grid:before,.journey-strip:before{
-  content:"STAR'S JOURNEY";
-  position:absolute;left:0;top:10px;
-  font-size:.72rem;font-weight:800;letter-spacing:.20em;color:#d173ff
-}
-.history-grid:after,.journey-grid:after,.journey-strip:after{
-  content:"From origin story to what comes next.";
-  position:absolute;left:0;top:28px;
-  font-size:.9rem;font-weight:700;color:#f4efff
-}
-.journey-card,.history-card{
-  min-height:156px!important;
-  border-radius:18px!important;
-  overflow:hidden!important;
-  background-size:cover!important;
-  background-position:center!important
-}
-
-/* Sidebar artwork becomes an intentional poster panel */
-.sidebar-art{
-  height:310px!important;
-  margin-top:auto!important;
-  background-size:cover!important;
-  background-position:center 25%!important;
-  opacity:.82!important
-}
-.sidebar nav a{min-height:50px!important}
-
-/* Responsive safeguards */
-@media(max-width:1250px){
-  .sidebar{width:150px!important}
-  .main,.main-content,main{margin-left:150px!important;width:calc(100% - 150px)!important;max-width:calc(100% - 150px)!important}
-  .dashboard-grid,.main-grid{grid-template-columns:minmax(0,1.55fr) minmax(290px,.8fr)!important}
-  .hero img,.hero-avatar,.player-portrait{width:138px!important;height:138px!important;max-width:138px!important;right:24px!important}
-}
-@media(max-width:980px){
-  .dashboard-grid,.main-grid{grid-template-columns:1fr!important}
-  .stats,.stat-grid,.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .destination-grid,.nav-cards,.feature-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .history-grid,.journey-grid,.journey-strip{grid-template-columns:1fr!important}
+.toast.error{border-color:#81364e;color:#ffb4c5}
+.toast.success{border-color:#2f7158;color:#9af0c6}
+.inline-spinner{display:inline-block;width:9px;height:9px;border:2px solid #ffffff40;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:680px){
+  .modal-grid,.choice-grid,.identity-grid{grid-template-columns:1fr}
+  .auth-card,.modal-card{padding:16px}
 }
 </style>
 
 </head>
 <body>
-<div class="app">
 <aside class="sidebar">
   <div class="side-art"></div>
   <div class="brand">STAR'S<span>GALAXY</span></div>
-  <nav class="nav">
-    <a class="active"><b>⌂</b><span>Galaxy<br><small>Home</small></span></a>
-    <a><b>☑</b><span>Quests<br><small>Tasks & Habits</small></span></a>
-    <a><b>▣</b><span>Job Hunt<br><small>Opportunities</small></span></a>
-    <a><b>▤</b><span>Inventory<br><small>Documents</small></span></a>
-    <a><b>◷</b><span>Log<br><small>Activity History</small></span></a>
-    <a><b>♧</b><span>Crew<br><small>Family</small></span></a>
-    <a><b>⚙</b><span>Settings<br><small>Profile & Preferences</small></span></a>
+  <nav class="nav" aria-label="Primary navigation">
+    <a class="active" href="#" data-view="home"><b>⌂</b><span>Galaxy<br><small>Home</small></span></a>
+    <a href="#" data-view="quests"><b>☑</b><span>Quests<br><small>Tasks &amp; Habits</small></span></a>
+    <a href="#" data-view="jobs"><b>▣</b><span>Job Hunt<br><small>Opportunities</small></span></a>
+    <a href="#" data-view="documents"><b>▤</b><span>Inventory<br><small>Documents</small></span></a>
+    <a href="#" data-view="log"><b>◷</b><span>Log<br><small>Activity History</small></span></a>
+    <a href="#" data-view="crew"><b>♧</b><span>Crew<br><small>Family</small></span></a>
+    <a href="#" data-view="settings"><b>⚙</b><span>Settings<br><small>Profile &amp; Preferences</small></span></a>
   </nav>
   <div class="side-quote">Progress<br>Lives Here ♕</div>
 </aside>
 
 <main class="main">
-<section class="hero">
-  <div class="hero-copy">
-    <div class="eyebrow">PLAYER WORLD // PERSONAL COMMAND CENTER</div>
-    <div class="logo">STAR'S<span>GALAXY</span></div>
-    <div class="status">EVENOTTER <em>// ONLINE</em></div>
+<div class="content">
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">PLAYER WORLD // PERSONAL COMMAND CENTER</div>
+      <div class="logo">STAR'S<span>GALAXY</span></div>
+      <div class="status">EVENOTTER <em>// ONLINE</em></div>
+    </div>
+    <div class="hero-date" id="heroDate">TUE, SEP 29, 2026</div>
+    <div class="hero-character-ring"></div>
+    <img class="hero-character" src="assets/star-avatar.jpg" alt="Star avatar">
+    <div class="hero-tag" id="identityChip" role="button" tabindex="0" title="Switch family identity"><b>● SYSTEM ONLINE</b> &nbsp; <span id="identityChipName">CHOOSE PLAYER</span></div>
+  </section>
+
+  <section class="stats" aria-label="Galaxy summary">
+    <div class="stat"><div class="ico">✓</div><div><div class="num" id="statTodayNum">—</div><div class="label">Today's Quests</div><div class="sub" id="statTodaySub">Loading live data…</div></div></div>
+    <div class="stat"><div class="ico">▣</div><div><div class="num" id="statAppsNum">—</div><div class="label">Active Applications</div><div class="sub" id="statAppsSub">Loading live data…</div></div></div>
+    <div class="stat"><div class="ico">⌕</div><div><div class="num" id="statJobsNum">—</div><div class="label">Job Opportunities</div><div class="sub" id="statJobsSub">Loading live data…</div></div></div>
+    <div class="stat"><div class="ico">▤</div><div><div class="num" id="statDocsNum">—</div><div class="label">Key Documents</div><div class="sub" id="statDocsSub">Loading live data…</div></div></div>
+    <button class="add" id="addBtn" type="button">＋ ADD⌄</button>
+  </section>
+
+  <div class="grid">
+    <section class="panel orbit-panel" id="questsSection">
+      <div class="orbit-head">
+        <div class="orbit-icon">◎</div>
+        <div><h2>TODAY'S ORBIT</h2><div class="sub">Your missions for today</div></div>
+        <div class="progress" id="questProgress" aria-label="Quest progress"><i id="questProgressBar" style="width:0%"></i></div>
+        <b class="progress-label" id="questProgressLabel">0 / 0 complete</b>
+      </div>
+      <div class="tabs" id="questTabs">
+        <button class="tab active" type="button" data-tab="today">Today (0)</button>
+        <button class="tab" type="button" data-tab="upcoming">Upcoming (0)</button>
+        <button class="tab" type="button" data-tab="overdue">Overdue (0)</button>
+      </div>
+      <div id="questList"><div class="quest-list-empty loading-line">Connecting to Star's Galaxy…</div></div>
+    </section>
+
+    <aside class="right-rail">
+      <section class="panel" id="jobsSection">
+        <div class="panel-title"><h2>▣ JOB HUNT</h2><small id="viewJobs" role="button" tabindex="0">View All →</small></div>
+        <div class="jobs">
+          <div class="jobstat"><b id="jobOppCount">0</b><small>Opportunities</small></div>
+          <div class="jobstat"><b id="jobActiveCount">0</b><small>Active</small></div>
+          <div class="jobstat"><b id="jobFollowCount">0</b><small>Follow-Ups</small></div>
+          <div class="jobstat"><b id="jobInterviewCount">0</b><small>Interview</small></div>
+        </div>
+        <div class="next" id="nextJobAction"><div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:3px;font-size:10px"><strong>Loading…</strong></div><div class="sub">Connecting to job tracker</div></div>
+      </section>
+
+      <section class="panel" id="crewSection">
+        <div class="panel-title"><h2>♧ GALAXY CREW</h2><small id="viewCrew" role="button" tabindex="0">Family</small></div>
+        <div id="crewList"><div class="sub loading-line">Loading crew…</div></div>
+      </section>
+
+      <section class="panel" id="logSection">
+        <div class="panel-title"><h2>〽 RECENT TRANSMISSIONS</h2><small id="viewLog" role="button" tabindex="0">View All →</small></div>
+        <div id="activityList"><div class="sub loading-line">Loading transmissions…</div></div>
+      </section>
+    </aside>
   </div>
-  <div class="hero-date">TUE, SEP 29, 2026</div>
-  <div class="hero-character-ring"></div>
-  <img class="hero-character" src="assets/star-avatar.jpg" alt="Star">
-  <div class="hero-tag"><b>● SYSTEM ONLINE</b> &nbsp; PLAYER ONE</div>
-</section>
 
-<section class="stats">
-  <div class="stat"><div class="ico">✓</div><div><div class="num">5</div><div class="label">Today's Quests</div><div class="sub">2 complete · 3 remaining</div></div></div>
-  <div class="stat"><div class="ico">▣</div><div><div class="num">3</div><div class="label">Active Applications</div><div class="sub">2 follow-ups · 1 interview</div></div></div>
-  <div class="stat"><div class="ico">⌕</div><div><div class="num">8</div><div class="label">Job Opportunities</div><div class="sub">4 new this week</div></div></div>
-  <div class="stat"><div class="ico">▤</div><div><div class="num">3</div><div class="label">Key Documents</div><div class="sub">Resume · Cover Letters · References</div></div></div>
-  <button class="add">＋ ADD⌄</button>
-</section>
+  <section class="destinations">
+    <div class="destination" data-view="quests" role="button" tabindex="0"><div><h3>QUESTS</h3><p>Tasks &amp; Habits</p></div></div>
+    <div class="destination" data-view="jobs" role="button" tabindex="0"><div><h3>JOB HUNT</h3><p>Opportunities &amp; Applications</p></div></div>
+    <div class="destination" data-view="documents" role="button" tabindex="0"><div><h3>INVENTORY</h3><p>Documents &amp; Evidence</p></div></div>
+    <div class="destination" data-view="log" role="button" tabindex="0"><div><h3>LOG</h3><p>Activity History</p></div></div>
+  </section>
 
-<div class="grid">
-<section class="panel">
-  <div class="orbit-head"><div class="orbit-icon">◎</div><div><h2 style="margin:0">TODAY'S ORBIT</h2><div class="sub">Your missions for today</div></div><div class="progress"><i></i></div><b style="font-size:11px">2 / 5 complete</b></div>
-  <div class="tabs"><div class="tab active">Today (5)</div><div class="tab">Upcoming (7)</div><div class="tab">Overdue (1)</div></div>
-  <div class="quest"><div class="check done">✓</div><div><strong>☀️ Get dressed and ready for the day</strong><br><span class="tag">Daily Routine</span></div><div class="meta">📷 Photo required · 9:00 AM</div><div class="action">Completed</div></div>
-  <div class="quest"><div class="check"></div><div><strong>⌂ Leave the house today</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · 5:00 PM</div><div class="action">📷 Upload Photo</div></div>
-  <div class="quest"><div class="check"></div><div><strong>▣ Apply to Costco · Front End Assistant</strong><br><span class="tag">Job Hunt</span></div><div class="meta">🔗 Screenshot/link · Today</div><div class="action">View Job →</div></div>
-  <div class="quest"><div class="check done">✓</div><div><strong>🏋 30 minutes of activity</strong><br><span class="tag">Personal</span></div><div class="meta">📷 Photo required · Completed</div><div class="action">Completed</div></div>
-  <div class="quest"><div class="check"></div><div><strong>▤ Clean room</strong><br><span class="tag">Home</span></div><div class="meta">📷 Photo required · 8:00 PM</div><div class="action">📷 Upload Photo</div></div>
-</section>
-
-<aside>
-  <section class="panel">
-    <div class="panel-title"><h2>▣ JOB HUNT</h2><small>View All →</small></div>
-    <div class="jobs"><div class="jobstat"><b>8</b><small>Opportunities</small></div><div class="jobstat"><b>3</b><small>Active</small></div><div class="jobstat"><b>2</b><small>Follow-Ups</small></div><div class="jobstat"><b>1</b><small>Interview</small></div></div>
-    <div class="next"><div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:5px;font-size:12px"><strong>Target</strong><br>Guest Advocate</div><div class="sub">Oxn Hill, MD · Part time · ~4 miles</div></div>
+  <section class="memory">
+    <div class="memory-card"><div><b>ORIGIN STORY</b><span>Where the journey started</span></div></div>
+    <div class="memory-card"><div><b>MILESTONES</b><span>Moments worth remembering</span></div></div>
+    <div class="memory-card"><div><b>ACHIEVEMENTS</b><span>Progress made visible</span></div></div>
   </section>
-  <section class="panel crew">
-    <div class="panel-title"><h2>♧ GALAXY CREW</h2><small>Family</small></div>
-    <div class="crew-row"><img src="assets/childhood.jpg"><div><b>Dad</b><small>Galaxy Crew</small></div><i class="online"></i></div>
-    <div class="crew-row"><img src="assets/purple-art.jpg"><div><b>Mom</b><small>Galaxy Crew</small></div><i class="online"></i></div>
-    <div class="crew-row"><img src="assets/fire-art.jpg"><div><b>Tay</b><small>Galaxy Crew</small></div><i class="online"></i></div>
-  </section>
-  <section class="panel transmission">
-    <div class="panel-title"><h2>〽 RECENT TRANSMISSIONS</h2><small>View All →</small></div>
-    <div class="activity"><img src="assets/purple-art.jpg"><div><b>Tay</b> added a job opportunity<div class="sub">Target · Guest Advocate</div></div><time>2:14 PM</time></div>
-    <div class="activity"><img src="assets/star-avatar.jpg"><div><b>Star</b> completed a daily quest<div class="sub">Get dressed and ready for the day</div></div><time>9:12 AM</time></div>
-    <div class="activity"><img src="assets/childhood.jpg"><div><b>Dad</b> assigned a mission<div class="sub">Apply to Costco · Front End Assistant</div></div><time>8:46 AM</time></div>
-  </section>
-</aside>
 </div>
-
-<section class="destinations">
-  <div class="destination"><div><h3>QUESTS</h3><p>Tasks & Habits</p></div></div>
-  <div class="destination"><div><h3>JOB HUNT</h3><p>Opportunities & Applications</p></div></div>
-  <div class="destination"><div><h3>INVENTORY</h3><p>Documents & Evidence</p></div></div>
-  <div class="destination"><div><h3>LOG</h3><p>Activity History</p></div></div>
-</section>
-
-<section class="memory">
-  <div class="memory-card"><div><b>ORIGIN STORY</b><span>Where the journey started</span></div></div>
-  <div class="memory-card"><div><b>MILESTONES</b><span>Moments worth remembering</span></div></div>
-  <div class="memory-card"><div><b>ACHIEVEMENTS</b><span>Progress made visible</span></div></div>
-</section>
 </main>
+
+
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">STAR'S<span>GALAXY</span></div>
+    <div class="auth-kicker">SECURE FAMILY ACCESS</div>
+    <h1>Enter the Galaxy</h1>
+    <p>Sign in once on this device. Your session will stay saved, then you can choose Dad, Mom, Star, Tay, or Vaughn as the active family identity.</p>
+    <form class="auth-form" id="magicForm">
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="email" placeholder="family@email.com" required>
+      </div>
+      <div class="auth-actions">
+        <button class="primary-btn" id="magicBtn" type="submit">Send secure sign-in link</button>
+        <button class="text-btn" id="showPasswordBtn" type="button">Use password instead</button>
+      </div>
+    </form>
+    <form class="auth-form is-hidden" id="passwordForm">
+      <div class="field">
+        <label for="passwordEmail">Email</label>
+        <input id="passwordEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="auth-actions">
+        <button class="primary-btn" id="passwordBtn" type="submit">Sign in</button>
+        <button class="text-btn" id="showMagicBtn" type="button">Use secure email link instead</button>
+      </div>
+    </form>
+    <div class="auth-message" id="authMessage"></div>
+    <p class="auth-note">Only existing Star's Galaxy family accounts can sign in. This page never uses a secret or service-role key.</p>
+  </div>
 </div>
+
+<div class="modal-backdrop is-hidden" id="modalBackdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">Star's Galaxy</h2>
+      <button class="modal-close" id="modalClose" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL = 'https://wkuivvjkbpvntjqmcddu.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_d4LVP6wcVzfFZ_zsHHtGHg_qelbgPNC';
+  const EVIDENCE_BUCKET = 'galaxy-evidence';
+  const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+  if (!window.supabase || !window.supabase.createClient) {
+    document.getElementById('authMessage').textContent = 'Supabase could not load. Check the internet connection and refresh.';
+    document.getElementById('authMessage').classList.add('error');
+    return;
+  }
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+
+  const state = {
+    session: null,
+    profiles: [],
+    quests: [],
+    jobs: [],
+    documents: [],
+    activity: [],
+    starProfile: null,
+    actorProfile: null,
+    activeQuestTab: 'today',
+    loading: false
+  };
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  const authGate = $('#authGate');
+  const modalBackdrop = $('#modalBackdrop');
+  const modalTitle = $('#modalTitle');
+  const modalBody = $('#modalBody');
+
+  function escapeHtml(value='') {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    })[ch]);
+  }
+
+  function localISODate(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatDate(value, withTime=false) {
+    if (!value) return '';
+    const d = new Date(value.length === 10 ? `${value}T12:00:00` : value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return new Intl.DateTimeFormat('en-US', withTime
+      ? {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}
+      : {month:'short',day:'numeric'}
+    ).format(d);
+  }
+
+  function formatTime(value) {
+    if (!value) return '';
+    const [h,m] = String(value).split(':').map(Number);
+    if (!Number.isFinite(h)) return value;
+    const d = new Date();
+    d.setHours(h, m || 0, 0, 0);
+    return new Intl.DateTimeFormat('en-US',{hour:'numeric',minute:'2-digit'}).format(d);
+  }
+
+  function relativeTime(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    const diff = Date.now() - d.getTime();
+    if (!Number.isFinite(diff)) return '';
+    const mins = Math.max(0, Math.floor(diff/60000));
+    if (mins < 1) return 'now';
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins/60);
+    if (hrs < 24) return `${hrs}h`;
+    const days = Math.floor(hrs/24);
+    if (days < 7) return `${days}d`;
+    return formatDate(value);
+  }
+
+  function displayName(profile) {
+    if (!profile) return 'Galaxy Crew';
+    const raw = profile.display_name || 'Galaxy Crew';
+    if (raw.toLowerCase() === 'kristen') return 'Mom';
+    return raw;
+  }
+
+  function avatarFor(profile) {
+    if (profile?.avatar_url) return escapeHtml(profile.avatar_url);
+    const name = (profile?.display_name || '').toLowerCase();
+    if (name.includes('star')) return 'assets/star-avatar.jpg';
+    if (name.includes('dad')) return 'assets/childhood.jpg';
+    if (name.includes('kristen') || name.includes('mom')) return 'assets/purple-art.jpg';
+    if (name.includes('tay')) return 'assets/fire-art.jpg';
+    if (name.includes('vaughn')) return 'assets/graduation.jpg';
+    return 'assets/purple-art.jpg';
+  }
+
+  function toast(message, type='') {
+    const wrap = $('#toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`.trim();
+    el.textContent = message;
+    wrap.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+
+  function setAuthMessage(message='', isError=false) {
+    const el = $('#authMessage');
+    el.textContent = message;
+    el.classList.toggle('error', !!isError);
+  }
+
+  function setBusy(btn, busy, label='Working…') {
+    if (!btn) return;
+    if (busy) {
+      btn.dataset.originalText = btn.textContent;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="inline-spinner"></span> ${escapeHtml(label)}`;
+    } else {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+    }
+  }
+
+  function setHeroDate() {
+    const el = $('#heroDate');
+    if (!el) return;
+    const parts = new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).formatToParts(new Date());
+    const get = t => parts.find(p => p.type === t)?.value || '';
+    el.textContent = `${get('weekday')}, ${get('month')} ${get('day')}, ${get('year')}`.toUpperCase();
+  }
+
+  function openModal(title, html, onMount) {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = html;
+    modalBackdrop.classList.remove('is-hidden');
+    modalBackdrop.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+    if (typeof onMount === 'function') onMount();
+  }
+
+  function closeModal() {
+    modalBackdrop.classList.add('is-hidden');
+    modalBackdrop.setAttribute('aria-hidden','true');
+    modalBody.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  $('#modalClose').addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalBackdrop.classList.contains('is-hidden')) closeModal(); });
+
+  async function signInMagic(email) {
+    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    return db.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false, emailRedirectTo: redirectTo }
+    });
+  }
+
+  $('#magicForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = $('#authEmail').value.trim();
+    if (!email) return;
+    const btn = $('#magicBtn');
+    setBusy(btn, true, 'Sending…');
+    setAuthMessage('');
+    const { error } = await signInMagic(email);
+    setBusy(btn, false);
+    if (error) return setAuthMessage(error.message, true);
+    setAuthMessage('Secure sign-in link sent. Open it on this device to enter Star’s Galaxy.');
+  });
+
+  $('#showPasswordBtn').addEventListener('click', () => {
+    $('#passwordEmail').value = $('#authEmail').value;
+    $('#magicForm').classList.add('is-hidden');
+    $('#passwordForm').classList.remove('is-hidden');
+    setAuthMessage('');
+  });
+
+  $('#showMagicBtn').addEventListener('click', () => {
+    $('#authEmail').value = $('#passwordEmail').value;
+    $('#passwordForm').classList.add('is-hidden');
+    $('#magicForm').classList.remove('is-hidden');
+    setAuthMessage('');
+  });
+
+  $('#passwordForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = $('#passwordEmail').value.trim();
+    const password = $('#authPassword').value;
+    const btn = $('#passwordBtn');
+    setBusy(btn, true, 'Signing in…');
+    setAuthMessage('');
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    setBusy(btn, false);
+    if (error) return setAuthMessage(error.message, true);
+  });
+
+  async function loadAll({quiet=false}={}) {
+    if (!state.session || state.loading) return;
+    state.loading = true;
+    try {
+      const [profilesRes, questsRes, jobsRes, docsRes, activityRes] = await Promise.all([
+        db.from('profiles').select('*').order('display_name'),
+        db.from('quests').select('*').order('due_date',{ascending:true,nullsFirst:false}).order('due_time',{ascending:true,nullsFirst:false}),
+        db.from('jobs').select('*').order('date_discovered',{ascending:false,nullsFirst:false}),
+        db.from('documents').select('*').order('created_at',{ascending:false}),
+        db.from('activity_log').select('*').order('created_at',{ascending:false}).limit(100)
+      ]);
+
+      const errors = [profilesRes,questsRes,jobsRes,docsRes,activityRes].map(r=>r.error).filter(Boolean);
+      if (errors.length) throw errors[0];
+
+      state.profiles = profilesRes.data || [];
+      state.quests = questsRes.data || [];
+      state.jobs = jobsRes.data || [];
+      state.documents = docsRes.data || [];
+      state.activity = activityRes.data || [];
+
+      state.starProfile =
+        state.profiles.find(p => (p.display_name || '').toLowerCase() === 'star') ||
+        state.profiles.find(p => (p.role_label || '').toLowerCase().includes('evenotter')) ||
+        null;
+
+      restoreActor();
+      renderAll();
+
+      if (!state.actorProfile && state.profiles.length) {
+        showIdentityPicker(true);
+      }
+      if (!quiet) toast('Galaxy synchronized.', 'success');
+    } catch (err) {
+      console.error(err);
+      toast(`Live data error: ${err.message || err}`, 'error');
+      renderConnectionError(err);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  function restoreActor() {
+    const saved = localStorage.getItem('starsGalaxyActorId');
+    const sessionProfile = state.profiles.find(p => p.id === state.session?.user?.id);
+    state.actorProfile =
+      state.profiles.find(p => p.id === saved) ||
+      sessionProfile ||
+      null;
+  }
+
+  function chooseActor(id) {
+    const profile = state.profiles.find(p => p.id === id);
+    if (!profile) return;
+    state.actorProfile = profile;
+    localStorage.setItem('starsGalaxyActorId', profile.id);
+    renderIdentity();
+    renderCrew();
+    closeModal();
+    toast(`Active identity: ${displayName(profile)}`, 'success');
+  }
+
+  function showIdentityPicker(required=false) {
+    const choices = state.profiles.map(p => `
+      <button type="button" class="identity-choice" data-actor-id="${escapeHtml(p.id)}">
+        <img src="${avatarFor(p)}" alt="">
+        <span><b>${escapeHtml(displayName(p))}</b><small>${escapeHtml(p.role_label || 'Galaxy Crew')}</small></span>
+      </button>`).join('');
+
+    openModal(required ? 'Who are you?' : 'Switch Family Identity', `
+      <p style="margin:0 0 12px;color:#aab1cb;line-height:1.5">
+        Choose the person using the app right now. Star’s Galaxy records this identity on new quests, jobs, evidence, documents, and transmissions.
+      </p>
+      <div class="identity-grid">${choices || '<div class="quest-list-empty">No profiles are available.</div>'}</div>
+    `, () => {
+      $$('.identity-choice', modalBody).forEach(btn => btn.addEventListener('click', () => chooseActor(btn.dataset.actorId)));
+    });
+  }
+
+  function renderIdentity() {
+    const name = displayName(state.actorProfile);
+    $('#identityChipName').textContent = state.actorProfile ? name.toUpperCase() : 'CHOOSE PLAYER';
+  }
+
+  function starQuests() {
+    if (!state.starProfile) return state.quests;
+    return state.quests.filter(q => !q.assigned_to || q.assigned_to === state.starProfile.id);
+  }
+
+  function questBuckets() {
+    const today = localISODate();
+    const relevant = starQuests().filter(q => !['cancelled'].includes(q.status));
+    return {
+      today: relevant.filter(q => q.due_date === today),
+      upcoming: relevant.filter(q => q.due_date && q.due_date > today && q.status !== 'completed'),
+      overdue: relevant.filter(q => q.due_date && q.due_date < today && !['completed','cancelled'].includes(q.status))
+    };
+  }
+
+  function renderStats() {
+    const buckets = questBuckets();
+    const today = buckets.today;
+    const complete = today.filter(q => q.status === 'completed').length;
+    $('#statTodayNum').textContent = today.length;
+    $('#statTodaySub').textContent = `${complete} complete · ${Math.max(0,today.length-complete)} remaining`;
+
+    const activeStatuses = new Set(['applying','applied','follow_up','interview','offer']);
+    const activeApps = state.jobs.filter(j => activeStatuses.has(j.status));
+    const follow = state.jobs.filter(j => j.status === 'follow_up').length;
+    const interviews = state.jobs.filter(j => j.status === 'interview').length;
+    $('#statAppsNum').textContent = activeApps.length;
+    $('#statAppsSub').textContent = `${follow} follow-up${follow===1?'':'s'} · ${interviews} interview${interviews===1?'':'s'}`;
+
+    const openJobs = state.jobs.filter(j => !['rejected','closed','passed'].includes(j.status));
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    const newWeek = openJobs.filter(j => j.date_discovered && new Date(`${j.date_discovered}T12:00:00`) >= weekAgo).length;
+    $('#statJobsNum').textContent = openJobs.length;
+    $('#statJobsSub').textContent = `${newWeek} new this week`;
+
+    const currentDocs = state.documents.filter(d => d.is_current !== false);
+    $('#statDocsNum').textContent = currentDocs.length;
+    const types = [...new Set(currentDocs.map(d => String(d.document_type || '').replace('_',' ')).filter(Boolean))].slice(0,3);
+    $('#statDocsSub').textContent = types.length ? types.map(t => t.replace(/\b\w/g,c=>c.toUpperCase())).join(' · ') : 'No current documents yet';
+  }
+
+  const questIcon = category => ({
+    'Daily Routine':'☀️','Home':'▤','Personal':'🏋','Appointment':'◷','Job Hunt':'▣','Other':'✦'
+  })[category] || '✦';
+
+  function questMeta(q) {
+    const bits = [];
+    if (q.evidence_required) {
+      const ev = (q.evidence_type || 'evidence').replace('_',' ');
+      bits.push(`${['photo','screenshot'].includes(q.evidence_type) ? '📷' : q.evidence_type==='link' ? '🔗' : '📎'} ${ev[0]?.toUpperCase() + ev.slice(1)} required`);
+    }
+    if (q.status === 'completed') bits.push('Completed');
+    else if (q.due_time) bits.push(formatTime(q.due_time));
+    else if (q.due_date) bits.push(q.due_date === localISODate() ? 'Today' : formatDate(q.due_date));
+    return bits.join(' · ');
+  }
+
+  function renderQuests() {
+    const buckets = questBuckets();
+    const todayComplete = buckets.today.filter(q => q.status === 'completed').length;
+    const pct = buckets.today.length ? Math.round(todayComplete / buckets.today.length * 100) : 0;
+    $('#questProgressBar').style.width = `${pct}%`;
+    $('#questProgressLabel').textContent = `${todayComplete} / ${buckets.today.length} complete`;
+    $('#questProgress').setAttribute('aria-label', `${pct} percent complete`);
+
+    $$('#questTabs .tab').forEach(btn => {
+      const key = btn.dataset.tab;
+      const label = key === 'today' ? 'Today' : key === 'upcoming' ? 'Upcoming' : 'Overdue';
+      btn.textContent = `${label} (${buckets[key].length})`;
+      btn.classList.toggle('active', key === state.activeQuestTab);
+    });
+
+    const list = buckets[state.activeQuestTab] || [];
+    const host = $('#questList');
+    if (!list.length) {
+      const copy = state.activeQuestTab === 'today'
+        ? 'No quests in today’s orbit yet. Use + ADD to create one.'
+        : state.activeQuestTab === 'upcoming'
+          ? 'No upcoming quests.'
+          : 'No overdue quests. Clear orbit.';
+      host.innerHTML = `<div class="quest-list-empty">${copy}</div>`;
+      return;
+    }
+
+    host.innerHTML = list.map(q => {
+      const done = q.status === 'completed';
+      const needsEvidence = !!q.evidence_required && !done;
+      const actionText = done ? 'Completed' : needsEvidence
+        ? (['photo','screenshot'].includes(q.evidence_type) ? '📷 Upload Evidence' : q.evidence_type === 'link' ? '🔗 Add Link' : '📎 Add Evidence')
+        : q.job_id ? 'View Job →' : 'Complete';
+      return `
+        <div class="quest" data-quest-id="${escapeHtml(q.id)}">
+          <button class="check ${done?'done':''}" type="button" data-quest-check="${escapeHtml(q.id)}" aria-label="${done?'Reopen':'Complete'} quest">${done?'✓':''}</button>
+          <div><strong>${questIcon(q.category)} ${escapeHtml(q.title)}</strong><br><span class="tag">${escapeHtml(q.category || 'Other')}</span></div>
+          <div class="meta">${escapeHtml(questMeta(q))}</div>
+          <button class="action" type="button" data-quest-action="${escapeHtml(q.id)}">${escapeHtml(actionText)}</button>
+        </div>`;
+    }).join('');
+
+    $$('[data-quest-check]', host).forEach(btn => btn.addEventListener('click', () => handleQuestCheck(btn.dataset.questCheck)));
+    $$('[data-quest-action]', host).forEach(btn => btn.addEventListener('click', () => handleQuestAction(btn.dataset.questAction)));
+  }
+
+  function renderJobs() {
+    const open = state.jobs.filter(j => !['rejected','closed','passed'].includes(j.status));
+    const opportunities = open.filter(j => ['opportunity','considering'].includes(j.status)).length;
+    const active = open.filter(j => ['applying','applied','follow_up','interview','offer'].includes(j.status)).length;
+    const follow = open.filter(j => j.status === 'follow_up').length;
+    const interview = open.filter(j => j.status === 'interview').length;
+    $('#jobOppCount').textContent = opportunities;
+    $('#jobActiveCount').textContent = active;
+    $('#jobFollowCount').textContent = follow;
+    $('#jobInterviewCount').textContent = interview;
+
+    const next = pickNextJobAction(open);
+    const box = $('#nextJobAction');
+    if (!next) {
+      box.innerHTML = `<div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:3px;font-size:10px"><strong>No action queued</strong></div><div class="sub">Add an opportunity to start the pipeline</div>`;
+      return;
+    }
+    const j = next.job;
+    const when = next.date ? formatDate(next.date, String(next.date).includes('T')) : '';
+    const meta = [j.location_text, j.employment_type?.replace('_',' '), when].filter(Boolean).join(' · ');
+    box.innerHTML = `<div class="target-logo">◎</div><b>NEXT ACTION</b><div style="margin-top:3px;font-size:10px"><strong>${escapeHtml(j.employer)}</strong><br>${escapeHtml(j.position_title)}</div><div class="sub">${escapeHtml(meta)}</div>`;
+    box.onclick = () => showJobsModal(j.id);
+  }
+
+  function pickNextJobAction(jobs) {
+    const now = new Date();
+    const candidates = [];
+    jobs.forEach(job => {
+      if (job.interview_at) candidates.push({job,date:job.interview_at,rank:0});
+      if (job.follow_up_date) candidates.push({job,date:`${job.follow_up_date}T12:00:00`,rank:1});
+      if (job.application_deadline) candidates.push({job,date:`${job.application_deadline}T12:00:00`,rank:2});
+    });
+    candidates.sort((a,b) => {
+      const ad = new Date(a.date), bd = new Date(b.date);
+      const aPast = ad < now ? 0 : 1, bPast = bd < now ? 0 : 1;
+      if (aPast !== bPast) return aPast - bPast; // overdue first
+      return ad - bd || a.rank - b.rank;
+    });
+    return candidates[0] || (jobs[0] ? {job:jobs[0],date:null,rank:9} : null);
+  }
+
+  function renderCrew() {
+    const host = $('#crewList');
+    if (!state.profiles.length) return host.innerHTML = `<div class="sub">No crew profiles found.</div>`;
+    host.innerHTML = state.profiles.map(p => `
+      <div class="crew-row">
+        <img src="${avatarFor(p)}" alt="">
+        <div><b>${escapeHtml(displayName(p))}</b><small>${escapeHtml(p.role_label || 'Galaxy Crew')}</small></div>
+        <i class="crew-dot ${state.actorProfile?.id===p.id?'current':''}" title="${state.actorProfile?.id===p.id?'Active identity':'Galaxy Crew'}"></i>
+      </div>`).join('');
+  }
+
+  function renderActivity() {
+    const host = $('#activityList');
+    const items = state.activity.slice(0,3);
+    if (!items.length) return host.innerHTML = `<div class="sub">No transmissions yet.</div>`;
+    host.innerHTML = items.map(a => {
+      const actor = state.profiles.find(p => p.id === a.actor_id);
+      const detail = activityDetail(a);
+      return `<div class="activity"><img src="${avatarFor(actor)}" alt=""><div><b>${escapeHtml(displayName(actor))}</b> ${escapeHtml(a.summary || 'updated the galaxy')}${detail?`<div class="sub">${escapeHtml(detail)}</div>`:''}</div><time>${escapeHtml(relativeTime(a.created_at))}</time></div>`;
+    }).join('');
+  }
+
+  function activityDetail(a) {
+    const d = a.details;
+    if (!d) return '';
+    if (typeof d === 'string') return d;
+    return d.title || d.employer || d.document_title || d.note || '';
+  }
+
+  function renderConnectionError(err) {
+    $('#questList').innerHTML = `<div class="quest-list-empty">Could not load live data: ${escapeHtml(err?.message || 'Unknown error')}</div>`;
+    ['statTodayNum','statAppsNum','statJobsNum','statDocsNum'].forEach(id => $(`#${id}`).textContent = '!');
+  }
+
+  function renderAll() {
+    renderIdentity();
+    renderStats();
+    renderQuests();
+    renderJobs();
+    renderCrew();
+    renderActivity();
+  }
+
+  async function logActivity(payload) {
+    if (!state.actorProfile) return;
+    const row = {
+      actor_id: state.actorProfile.id,
+      action_type: payload.action_type || 'update',
+      quest_id: payload.quest_id || null,
+      job_id: payload.job_id || null,
+      evidence_id: payload.evidence_id || null,
+      document_id: payload.document_id || null,
+      summary: payload.summary || 'updated the galaxy',
+      details: payload.details || null
+    };
+    const { error } = await db.from('activity_log').insert(row);
+    if (error) console.warn('Activity log insert failed:', error.message);
+  }
+
+  async function handleQuestCheck(id) {
+    const q = state.quests.find(x => x.id === id);
+    if (!q) return;
+    if (q.status === 'completed') {
+      if (!confirm(`Reopen "${q.title}"?`)) return;
+      const { error } = await db.from('quests').update({status:'not_started',completed_at:null}).eq('id',q.id);
+      if (error) return toast(error.message,'error');
+      await logActivity({action_type:'quest_reopened',quest_id:q.id,summary:'reopened a quest',details:{title:q.title}});
+      await loadAll({quiet:true});
+      toast('Quest reopened.','success');
+      return;
+    }
+    if (q.evidence_required) return showEvidenceModal(q);
+    await completeQuest(q);
+  }
+
+  async function handleQuestAction(id) {
+    const q = state.quests.find(x => x.id === id);
+    if (!q) return;
+    if (q.status === 'completed') return;
+    if (q.job_id) {
+      const job = state.jobs.find(j => j.id === q.job_id);
+      return showJobsModal(job?.id || null);
+    }
+    if (q.evidence_required) return showEvidenceModal(q);
+    await completeQuest(q);
+  }
+
+  async function completeQuest(q, evidenceId=null) {
+    const { error } = await db.from('quests').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',q.id);
+    if (error) return toast(error.message,'error');
+    await logActivity({
+      action_type:'quest_completed',
+      quest_id:q.id,
+      evidence_id:evidenceId,
+      summary:'completed a quest',
+      details:{title:q.title}
+    });
+    await loadAll({quiet:true});
+    toast(`Completed: ${q.title}`,'success');
+  }
+
+  function showEvidenceModal(q) {
+    const type = q.evidence_type || 'any';
+    const isText = type === 'contact_note';
+    const isLink = type === 'link';
+    const accept = type === 'photo' || type === 'screenshot' ? 'image/*'
+      : type === 'document' ? 'application/pdf,.doc,.docx,image/*'
+      : 'image/*,application/pdf,.doc,.docx';
+
+    openModal('Add Quest Evidence', `
+      <p style="margin:0 0 12px;color:#aab1cb">Evidence for <b style="color:#fff">${escapeHtml(q.title)}</b>. Saving evidence will complete this quest.</p>
+      <form id="evidenceForm" class="auth-form">
+        ${isLink ? `<div class="field"><label>Evidence link</label><input name="external_url" type="url" placeholder="https://…" required></div>`
+        : isText ? `<div class="field"><label>Contact note</label><textarea name="text_note" placeholder="What happened?" required></textarea></div>`
+        : `<div class="field"><label>${escapeHtml(type==='any'?'File':type)} evidence</label><input name="file" type="file" accept="${escapeHtml(accept)}" required><small style="color:#8e97b0">Maximum 10 MB.</small></div>`}
+        <div class="modal-actions"><button class="primary-btn" type="submit">Save Evidence + Complete</button><button class="secondary-btn" type="button" data-cancel>Cancel</button></div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+      $('#evidenceForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!state.actorProfile) return showIdentityPicker(true);
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,'Saving…');
+        try {
+          const row = {
+            uploaded_by: state.actorProfile.id,
+            quest_id: q.id,
+            job_id: q.job_id || null,
+            evidence_type: type,
+            storage_path: null,
+            external_url: null,
+            text_note: null,
+            is_routine: q.category === 'Daily Routine'
+          };
+          const fd = new FormData(e.currentTarget);
+          if (isLink) row.external_url = fd.get('external_url');
+          else if (isText) row.text_note = fd.get('text_note');
+          else {
+            const file = fd.get('file');
+            if (!file || !file.size) throw new Error('Choose a file first.');
+            if (file.size > MAX_UPLOAD_BYTES) throw new Error('The file is larger than the 10 MB bucket limit.');
+            const cleanName = file.name.replace(/[^a-zA-Z0-9._-]+/g,'-');
+            const path = `${q.id}/${Date.now()}-${cleanName}`;
+            const { error: uploadError } = await db.storage.from(EVIDENCE_BUCKET).upload(path,file,{upsert:false,contentType:file.type || undefined});
+            if (uploadError) throw uploadError;
+            row.storage_path = path;
+          }
+
+          const { data, error } = await db.from('evidence').insert(row).select('id').single();
+          if (error) throw error;
+          await logActivity({action_type:'evidence_added',quest_id:q.id,evidence_id:data.id,summary:'added quest evidence',details:{title:q.title}});
+          closeModal();
+          await completeQuest(q,data.id);
+        } catch (err) {
+          toast(err.message || String(err),'error');
+          setBusy(btn,false);
+        }
+      });
+    });
+  }
+
+  function showAddMenu() {
+    openModal('Add to Star’s Galaxy', `
+      <div class="choice-grid">
+        <button class="choice" type="button" data-add="quest"><b>✓ New Quest</b><span>Create a task, habit, mission, or deadline for Star.</span></button>
+        <button class="choice" type="button" data-add="job"><b>▣ Job Opportunity</b><span>Add a role to the job pipeline and track its status.</span></button>
+        <button class="choice" type="button" data-add="document"><b>▤ Document</b><span>Add a resume, cover letter, references, or another key link.</span></button>
+      </div>
+    `, () => {
+      $$('[data-add]',modalBody).forEach(btn => btn.addEventListener('click', () => {
+        if (btn.dataset.add === 'quest') showQuestForm();
+        if (btn.dataset.add === 'job') showJobForm();
+        if (btn.dataset.add === 'document') showDocumentForm();
+      }));
+    });
+  }
+
+  function showQuestForm() {
+    if (!state.actorProfile) return showIdentityPicker(true);
+    const today = localISODate();
+    openModal('Create Quest', `
+      <form id="questForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Quest title</label><input name="title" maxlength="160" required placeholder="What needs to happen?"></div>
+          <div class="field"><label>Category</label><select name="category">
+            ${['Daily Routine','Home','Personal','Appointment','Job Hunt','Other'].map(v=>`<option>${v}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>Due date</label><input name="due_date" type="date" value="${today}" required></div>
+          <div class="field"><label>Due time</label><input name="due_time" type="time"></div>
+          <div class="field"><label>Evidence</label><select name="evidence_type">
+            <option value="">No evidence required</option><option value="photo">Photo</option><option value="screenshot">Screenshot</option><option value="link">Link</option><option value="contact_note">Contact note</option><option value="document">Document</option><option value="any">Any evidence</option>
+          </select></div>
+          <div class="field full"><label>Description / notes</label><textarea name="description" placeholder="Optional details"></textarea></div>
+        </div>
+        <div class="modal-actions"><button class="primary-btn" type="submit">Create Quest</button><button class="secondary-btn" type="button" data-cancel>Cancel</button></div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+      $('#questForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,'Creating…');
+        const fd = new FormData(e.currentTarget);
+        const ev = String(fd.get('evidence_type') || '');
+        const row = {
+          title: String(fd.get('title')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          category: fd.get('category'),
+          assigned_to: state.starProfile?.id || null,
+          assigned_by: state.actorProfile.id,
+          due_date: fd.get('due_date') || null,
+          due_time: fd.get('due_time') || null,
+          status: 'not_started',
+          evidence_required: !!ev,
+          evidence_type: ev || 'any'
+        };
+        const { data, error } = await db.from('quests').insert(row).select('id,title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({action_type:'quest_created',quest_id:data.id,summary:'assigned a mission',details:{title:data.title}});
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Quest added to the orbit.','success');
+      });
+    });
+  }
+
+  const JOB_STATUSES = ['opportunity','considering','applying','applied','follow_up','interview','offer','rejected','closed','passed'];
+  const EMPLOYMENT_TYPES = ['full_time','part_time','temporary','seasonal','contract','other'];
+
+  function showJobForm() {
+    if (!state.actorProfile) return showIdentityPicker(true);
+    openModal('Add Job Opportunity', `
+      <form id="jobForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field"><label>Employer</label><input name="employer" required></div>
+          <div class="field"><label>Position</label><input name="position_title" required></div>
+          <div class="field full"><label>Job link</label><input name="job_url" type="url" placeholder="https://…"></div>
+          <div class="field"><label>Location</label><input name="location_text" placeholder="City, state"></div>
+          <div class="field"><label>Employment type</label><select name="employment_type">${EMPLOYMENT_TYPES.map(v=>`<option value="${v}">${v.replace('_',' ')}</option>`).join('')}</select></div>
+          <div class="field"><label>Status</label><select name="status">${JOB_STATUSES.map(v=>`<option value="${v}">${v.replace('_',' ')}</option>`).join('')}</select></div>
+          <div class="field"><label>Follow-up date</label><input name="follow_up_date" type="date"></div>
+          <div class="field full"><label>Notes</label><textarea name="notes"></textarea></div>
+        </div>
+        <div class="modal-actions"><button class="primary-btn" type="submit">Add Opportunity</button><button class="secondary-btn" type="button" data-cancel>Cancel</button></div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+      $('#jobForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,'Adding…');
+        const fd = new FormData(e.currentTarget);
+        const row = {
+          employer: String(fd.get('employer')).trim(),
+          position_title: String(fd.get('position_title')).trim(),
+          job_url: String(fd.get('job_url') || '').trim() || null,
+          location_text: String(fd.get('location_text') || '').trim() || null,
+          employment_type: fd.get('employment_type') || 'other',
+          status: fd.get('status') || 'opportunity',
+          follow_up_date: fd.get('follow_up_date') || null,
+          notes: String(fd.get('notes') || '').trim() || null,
+          discovered_by: state.actorProfile.id,
+          assigned_to: state.starProfile?.id || null,
+          date_discovered: localISODate()
+        };
+        const { data, error } = await db.from('jobs').insert(row).select('id,employer,position_title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({action_type:'job_added',job_id:data.id,summary:'added a job opportunity',details:{employer:data.employer,title:data.position_title}});
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Job opportunity added.','success');
+      });
+    });
+  }
+
+  function showDocumentForm() {
+    if (!state.actorProfile) return showIdentityPicker(true);
+    openModal('Add Key Document', `
+      <form id="documentForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Document title</label><input name="title" required></div>
+          <div class="field"><label>Type</label><select name="document_type">
+            <option value="resume">Resume</option><option value="cover_letter">Cover letter</option><option value="references">References</option><option value="other">Other</option>
+          </select></div>
+          <div class="field full"><label>Document link</label><input name="url" type="url" required placeholder="https://…"></div>
+          <div class="field full"><label>Description</label><textarea name="description"></textarea></div>
+        </div>
+        <div class="modal-actions"><button class="primary-btn" type="submit">Add Document</button><button class="secondary-btn" type="button" data-cancel>Cancel</button></div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+      $('#documentForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,'Adding…');
+        const fd = new FormData(e.currentTarget);
+        const row = {
+          title: String(fd.get('title')).trim(),
+          document_type: fd.get('document_type'),
+          url: String(fd.get('url')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          added_by: state.actorProfile.id,
+          is_current: true
+        };
+        const { data, error } = await db.from('documents').insert(row).select('id,title').single();
+        if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+        await logActivity({action_type:'document_added',document_id:data.id,summary:'added a key document',details:{document_title:data.title}});
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Document added to Inventory.','success');
+      });
+    });
+  }
+
+  function showJobsModal(focusId=null) {
+    const rows = state.jobs.map(j => `
+      <div class="list-item" ${j.id===focusId?'style="border-color:#b93bfa"':''}>
+        <div class="list-item-head">
+          <div><b>${escapeHtml(j.employer)} · ${escapeHtml(j.position_title)}</b><p>${escapeHtml([j.location_text,j.employment_type?.replace('_',' '),j.follow_up_date?`Follow up ${formatDate(j.follow_up_date)}`:''].filter(Boolean).join(' · '))}</p></div>
+          <select class="status-select" data-job-status="${escapeHtml(j.id)}">${JOB_STATUSES.map(s=>`<option value="${s}" ${j.status===s?'selected':''}>${s.replace('_',' ')}</option>`).join('')}</select>
+        </div>
+        ${j.job_url?`<div style="margin-top:7px"><a class="small-link" href="${escapeHtml(j.job_url)}" target="_blank" rel="noopener">Open job listing ↗</a></div>`:''}
+      </div>`).join('');
+
+    openModal('Job Hunt', `
+      <div class="modal-actions" style="margin:0 0 12px"><button class="primary-btn" type="button" id="modalAddJob">＋ Add Opportunity</button></div>
+      <div class="list-stack">${rows || '<div class="quest-list-empty">No jobs yet.</div>'}</div>
+    `, () => {
+      $('#modalAddJob').onclick = showJobForm;
+      $$('[data-job-status]',modalBody).forEach(sel => sel.addEventListener('change', async () => {
+        const job = state.jobs.find(j => j.id === sel.dataset.jobStatus);
+        const nextStatus = sel.value;
+        const { error } = await db.from('jobs').update({status:nextStatus}).eq('id',job.id);
+        if (error) { toast(error.message,'error'); return; }
+        await logActivity({action_type:'job_status_updated',job_id:job.id,summary:'updated a job status',details:{employer:job.employer,title:job.position_title,status:nextStatus}});
+        await loadAll({quiet:true});
+        toast(`${job.employer}: ${nextStatus.replace('_',' ')}`,'success');
+      }));
+    });
+  }
+
+  function showDocumentsModal() {
+    const rows = state.documents.map(d => `
+      <div class="list-item">
+        <div class="list-item-head"><div><b>${escapeHtml(d.title)}</b><p>${escapeHtml((d.document_type||'other').replace('_',' '))}${d.description?` · ${escapeHtml(d.description)}`:''}</p></div><span class="badge">${d.is_current===false?'Archived':'Current'}</span></div>
+        <div style="margin-top:7px"><a class="small-link" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open document ↗</a></div>
+      </div>`).join('');
+    openModal('Inventory', `
+      <div class="modal-actions" style="margin:0 0 12px"><button class="primary-btn" id="modalAddDocument" type="button">＋ Add Document</button></div>
+      <div class="list-stack">${rows || '<div class="quest-list-empty">No documents yet.</div>'}</div>
+    `, () => $('#modalAddDocument').onclick = showDocumentForm);
+  }
+
+  function showActivityModal() {
+    const rows = state.activity.map(a => {
+      const actor = state.profiles.find(p=>p.id===a.actor_id);
+      return `<div class="list-item"><div class="list-item-head"><div><b>${escapeHtml(displayName(actor))} ${escapeHtml(a.summary || '')}</b><p>${escapeHtml(activityDetail(a))}</p></div><span class="badge">${escapeHtml(formatDate(a.created_at,true))}</span></div></div>`;
+    }).join('');
+    openModal('Activity Log', `<div class="list-stack">${rows || '<div class="quest-list-empty">No transmissions yet.</div>'}</div>`);
+  }
+
+  function showCrewModal() {
+    showIdentityPicker(false);
+  }
+
+  function showSettingsModal() {
+    const email = state.session?.user?.email || 'Authenticated family account';
+    openModal('Settings', `
+      <div class="list-stack">
+        <div class="list-item"><b>Secure access account</b><p>${escapeHtml(email)}</p></div>
+        <div class="list-item"><b>Active family identity</b><p>${escapeHtml(displayName(state.actorProfile))}</p></div>
+      </div>
+      <div class="modal-actions" style="margin-top:14px">
+        <button class="secondary-btn" id="switchIdentityBtn" type="button">Switch Identity</button>
+        <button class="danger-btn" id="signOutBtn" type="button">Sign Out This Device</button>
+      </div>
+    `, () => {
+      $('#switchIdentityBtn').onclick = () => showIdentityPicker(false);
+      $('#signOutBtn').onclick = async () => {
+        localStorage.removeItem('starsGalaxyActorId');
+        await db.auth.signOut();
+        closeModal();
+      };
+    });
+  }
+
+  function handleView(view) {
+    if (view === 'home') return window.scrollTo({top:0,behavior:'smooth'});
+    if (view === 'quests') return $('#questsSection').scrollIntoView({behavior:'smooth',block:'start'});
+    if (view === 'jobs') return showJobsModal();
+    if (view === 'documents') return showDocumentsModal();
+    if (view === 'log') return showActivityModal();
+    if (view === 'crew') return showCrewModal();
+    if (view === 'settings') return showSettingsModal();
+  }
+
+  $('#addBtn').addEventListener('click', showAddMenu);
+  $('#identityChip').addEventListener('click', () => showIdentityPicker(false));
+  $('#identityChip').addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') showIdentityPicker(false); });
+  $('#viewJobs').addEventListener('click', () => showJobsModal());
+  $('#viewCrew').addEventListener('click', showCrewModal);
+  $('#viewLog').addEventListener('click', showActivityModal);
+
+  $$('#questTabs .tab').forEach(btn => btn.addEventListener('click', () => {
+    state.activeQuestTab = btn.dataset.tab;
+    renderQuests();
+  }));
+
+  $$('[data-view]').forEach(el => {
+    const activate = e => {
+      if (el.tagName === 'A') e.preventDefault();
+      handleView(el.dataset.view);
+    };
+    el.addEventListener('click', activate);
+    if (el.getAttribute('role') === 'button') el.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') activate(e); });
+  });
+
+  window.addEventListener('focus', () => { if (state.session) loadAll({quiet:true}); });
+  setInterval(() => { if (state.session && document.visibilityState === 'visible') loadAll({quiet:true}); }, 60000);
+
+  db.auth.onAuthStateChange(async (event, session) => {
+    state.session = session;
+    if (session) {
+      authGate.classList.add('is-hidden');
+      await loadAll({quiet:true});
+    } else {
+      authGate.classList.remove('is-hidden');
+      state.profiles = []; state.quests = []; state.jobs = []; state.documents = []; state.activity = [];
+      state.actorProfile = null; state.starProfile = null;
+      renderIdentity();
+    }
+  });
+
+  async function init() {
+    setHeroDate();
+    const { data, error } = await db.auth.getSession();
+    if (error) setAuthMessage(error.message,true);
+    state.session = data?.session || null;
+    if (state.session) {
+      authGate.classList.add('is-hidden');
+      await loadAll({quiet:true});
+    } else {
+      authGate.classList.remove('is-hidden');
+    }
+  }
+
+  init();
+})();
+</script>
+
 </body>
 </html>
