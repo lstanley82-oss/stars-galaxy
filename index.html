@@ -569,6 +569,37 @@ button,.destination,.nav a,.panel-title small,.hero-tag{cursor:pointer}
 }
 </style>
 
+
+<style id="recurrence-controls-v1-2">
+/* LIVE v1.2 — recurring quests / habits. No visual redesign. */
+.repeat-note{
+  margin-top:6px;padding:8px 9px;border:1px solid #303a59;border-radius:8px;
+  background:#09101d;color:#9fa8c4;font-size:8.5px;line-height:1.45
+}
+.day-picker{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day-picker label{
+  display:grid;place-items:center;min-height:35px;border:1px solid #394361;border-radius:8px;
+  background:#0b1222;color:#b9bfd4;font-size:8px;font-weight:850;cursor:pointer;user-select:none
+}
+.day-picker input{display:none}
+.day-picker label:has(input:checked){
+  border-color:#c03df7;background:#35104c;color:#fff;box-shadow:0 0 10px #a82cff22
+}
+.habit-list{display:grid;gap:8px}
+.habit-card{
+  padding:11px;border:1px solid #303a59;border-radius:11px;background:#09101d
+}
+.habit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.habit-head b{font-size:10px}
+.habit-card p{margin:4px 0 0;color:#aab1cb;font-size:8.5px;line-height:1.45}
+.habit-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.habit-status{display:inline-block;padding:3px 7px;border:1px solid #445075;border-radius:999px;font-size:7px}
+.habit-status.active{border-color:#2f7158;color:#8ff0c0;background:#0d251d}
+.habit-status.paused{border-color:#73516c;color:#d8a9ce;background:#25131f}
+.repeat-marker{color:#cf68ff;font-weight:900}
+@media(max-width:680px){.day-picker{grid-template-columns:repeat(4,1fr)}}
+</style>
+
 </head>
 <body>
 <aside class="sidebar">
@@ -2134,6 +2165,763 @@ button,.destination,.nav a,.panel-title small,.hero-tag{cursor:pointer}
       $$('[data-delete-document]',modalBody).forEach(btn =>
         btn.addEventListener('click', () => showDocumentManager(btn.dataset.deleteDocument))
       );
+    });
+  }
+
+
+  /* ================================================================
+     LIVE v1.2 — RECURRING QUESTS / HABITS
+     Design choice: recurring templates materialize only the occurrence
+     due TODAY. This keeps Upcoming from filling with repeated daily rows.
+     ================================================================ */
+
+  state.templates = state.templates || [];
+
+  const WEEKDAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  function dateFromISO(iso) {
+    if (!iso) return null;
+    const d = new Date(`${iso}T12:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function templateStartDate(t) {
+    if (t.start_date) return t.start_date;
+    if (t.created_at) return localISODate(new Date(t.created_at));
+    return localISODate();
+  }
+
+  function recurrenceMatchesDate(template, isoDate) {
+    if (!template?.is_active || !template?.is_recurring) return false;
+
+    const date = dateFromISO(isoDate);
+    if (!date) return false;
+
+    const start = templateStartDate(template);
+    if (start && isoDate < start) return false;
+    if (template.end_date && isoDate > template.end_date) return false;
+
+    const day = date.getDay();
+    const days = Array.isArray(template.recurrence_days)
+      ? template.recurrence_days.map(Number)
+      : [];
+
+    switch (template.recurrence_type) {
+      case 'daily':
+        return true;
+      case 'weekdays':
+        return day >= 1 && day <= 5;
+      case 'weekly':
+        return days.length ? days.includes(day) : day === dateFromISO(start)?.getDay();
+      case 'custom':
+        return days.includes(day);
+      default:
+        return false;
+    }
+  }
+
+  function recurrenceDescription(template) {
+    const type = template?.recurrence_type || '';
+    if (type === 'daily') return 'Every day';
+    if (type === 'weekdays') return 'Weekdays';
+    if (type === 'weekly') {
+      const day = Array.isArray(template.recurrence_days) && template.recurrence_days.length
+        ? WEEKDAY_LABELS[Number(template.recurrence_days[0])]
+        : 'weekly';
+      return `Every ${day}`;
+    }
+    if (type === 'custom') {
+      const labels = (template.recurrence_days || [])
+        .map(Number).sort((a,b)=>a-b).map(d=>WEEKDAY_LABELS[d]).filter(Boolean);
+      return labels.length ? labels.join(', ') : 'Custom days';
+    }
+    return 'Recurring';
+  }
+
+  async function syncRecurringToday(templates, existingQuests) {
+    const today = localISODate();
+    const due = (templates || []).filter(t => recurrenceMatchesDate(t,today));
+    if (!due.length) return false;
+
+    const existingKeys = new Set(
+      (existingQuests || [])
+        .filter(q => q.template_id && q.due_date)
+        .map(q => `${q.template_id}__${q.due_date}`)
+    );
+
+    const rows = due
+      .filter(t => !existingKeys.has(`${t.id}__${today}`))
+      .map(t => ({
+        template_id: t.id,
+        title: t.title,
+        description: t.description || null,
+        category: t.category,
+        assigned_to: t.assigned_to || state.starProfile?.id || null,
+        assigned_by: t.assigned_by || state.actorProfile?.id || state.session?.user?.id || null,
+        due_date: today,
+        due_time: t.default_due_time || null,
+        status: 'not_started',
+        evidence_required: !!t.evidence_required,
+        evidence_type: t.evidence_type || 'any'
+      }));
+
+    if (!rows.length) return false;
+
+    const { error } = await db
+      .from('quests')
+      .upsert(rows, { onConflict:'template_id,due_date', ignoreDuplicates:true });
+
+    if (error) throw error;
+    return true;
+  }
+
+  async function loadAll({quiet=false}={}) {
+    if (!state.session || state.loading) return;
+    state.loading = true;
+
+    try {
+      const [profilesRes, templatesRes, questsRes, jobsRes, docsRes, activityRes] = await Promise.all([
+        db.from('profiles').select('*').order('display_name'),
+        db.from('quest_templates').select('*').order('created_at',{ascending:false}),
+        db.from('quests').select('*').order('due_date',{ascending:true,nullsFirst:false}).order('due_time',{ascending:true,nullsFirst:false}),
+        db.from('jobs').select('*').order('date_discovered',{ascending:false,nullsFirst:false}),
+        db.from('documents').select('*').order('created_at',{ascending:false}),
+        db.from('activity_log').select('*').order('created_at',{ascending:false}).limit(100)
+      ]);
+
+      const errors = [profilesRes,templatesRes,questsRes,jobsRes,docsRes,activityRes]
+        .map(r=>r.error).filter(Boolean);
+      if (errors.length) throw errors[0];
+
+      state.profiles = profilesRes.data || [];
+      state.templates = templatesRes.data || [];
+      state.quests = questsRes.data || [];
+      state.jobs = jobsRes.data || [];
+      state.documents = docsRes.data || [];
+      state.activity = activityRes.data || [];
+
+      state.starProfile =
+        state.profiles.find(p => (p.display_name || '').toLowerCase() === 'star') ||
+        state.profiles.find(p => (p.role_label || '').toLowerCase().includes('evenotter')) ||
+        null;
+
+      restoreActor();
+
+      const createdToday = await syncRecurringToday(state.templates, state.quests);
+      if (createdToday) {
+        const refreshed = await db
+          .from('quests')
+          .select('*')
+          .order('due_date',{ascending:true,nullsFirst:false})
+          .order('due_time',{ascending:true,nullsFirst:false});
+        if (refreshed.error) throw refreshed.error;
+        state.quests = refreshed.data || [];
+      }
+
+      renderAll();
+
+      if (!state.actorProfile && state.profiles.length) {
+        showIdentityPicker(true);
+      }
+      if (!quiet) toast('Galaxy synchronized.','success');
+    } catch (err) {
+      console.error(err);
+      toast(`Live data error: ${err.message || err}`,'error');
+      renderConnectionError(err);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  function renderQuests() {
+    const buckets = questBuckets();
+    const todayComplete = buckets.today.filter(q => q.status === 'completed').length;
+    const pct = buckets.today.length ? Math.round(todayComplete / buckets.today.length * 100) : 0;
+
+    $('#questProgressBar').style.width = `${pct}%`;
+    $('#questProgressLabel').textContent = `${todayComplete} / ${buckets.today.length} complete`;
+    $('#questProgress').setAttribute('aria-label', `${pct} percent complete`);
+
+    $$('#questTabs .tab').forEach(btn => {
+      const key = btn.dataset.tab;
+      const label = key === 'today' ? 'Today' : key === 'upcoming' ? 'Upcoming' : 'Overdue';
+      btn.textContent = `${label} (${buckets[key].length})`;
+      btn.classList.toggle('active', key === state.activeQuestTab);
+    });
+
+    const list = buckets[state.activeQuestTab] || [];
+    const host = $('#questList');
+
+    if (!list.length) {
+      const copy = state.activeQuestTab === 'today'
+        ? 'No quests in today’s orbit yet. Use + ADD to create one.'
+        : state.activeQuestTab === 'upcoming'
+          ? 'No upcoming quests.'
+          : 'No overdue quests. Clear orbit.';
+      host.innerHTML = `<div class="quest-list-empty">${copy}</div>`;
+      return;
+    }
+
+    host.innerHTML = list.map(q => {
+      const done = q.status === 'completed';
+      const needsEvidence = !!q.evidence_required && !done;
+      const actionText = done ? 'Completed' : needsEvidence
+        ? (['photo','screenshot'].includes(q.evidence_type) ? '📷 Upload Evidence'
+          : q.evidence_type === 'link' ? '🔗 Add Link' : '📎 Add Evidence')
+        : q.job_id ? 'View Job →' : 'Complete';
+      const recurring = !!q.template_id;
+
+      return `
+        <div class="quest" data-quest-id="${escapeHtml(q.id)}">
+          <button class="check ${done?'done':''}" type="button" data-quest-check="${escapeHtml(q.id)}" aria-label="${done?'Reopen':'Complete'} quest">${done?'✓':''}</button>
+          <div>
+            <strong>${recurring?'<span class="repeat-marker">↻</span> ':''}${questIcon(q.category)} ${escapeHtml(q.title)}</strong><br>
+            <span class="tag">${escapeHtml(q.category || 'Other')}${recurring?' · Habit':''}</span>
+          </div>
+          <div class="meta">${escapeHtml(questMeta(q))}</div>
+          <button class="action" type="button" data-quest-action="${escapeHtml(q.id)}">${escapeHtml(actionText)}</button>
+          <button class="manage-btn" type="button" data-quest-manage="${escapeHtml(q.id)}" aria-label="Edit or manage ${escapeHtml(q.title)}" title="Edit / Manage">⋯</button>
+        </div>`;
+    }).join('');
+
+    $$('[data-quest-check]', host).forEach(btn =>
+      btn.addEventListener('click', () => handleQuestCheck(btn.dataset.questCheck))
+    );
+    $$('[data-quest-action]', host).forEach(btn =>
+      btn.addEventListener('click', () => handleQuestAction(btn.dataset.questAction))
+    );
+    $$('[data-quest-manage]', host).forEach(btn =>
+      btn.addEventListener('click', () => showQuestManager(btn.dataset.questManage))
+    );
+  }
+
+  function dayPickerHtml(selectedDays=[]) {
+    const selectedSet = new Set((selectedDays || []).map(Number));
+    return WEEKDAY_LABELS.map((label,idx) => `
+      <label>
+        <input type="checkbox" name="recurrence_day" value="${idx}" ${selectedSet.has(idx)?'checked':''}>
+        ${label}
+      </label>`).join('');
+  }
+
+  function attachRecurrenceFormBehavior(form, recurrenceSelect, dayBlock, mode='create') {
+    const refresh = () => {
+      const value = recurrenceSelect.value;
+      dayBlock.classList.toggle('is-hidden', !['weekly','custom'].includes(value));
+      const note = $('[data-repeat-note]',form);
+      if (note) {
+        note.textContent =
+          value === ''
+            ? 'One-time quests appear only on the selected due date.'
+            : 'Recurring habits create the occurrence due today when Star’s Galaxy is opened. Future daily rows are not pre-generated.';
+      }
+    };
+
+    recurrenceSelect.addEventListener('change', () => {
+      if (recurrenceSelect.value === 'weekly') {
+        const boxes = $$('input[name="recurrence_day"]',dayBlock);
+        const checked = boxes.filter(b=>b.checked);
+        if (!checked.length) {
+          const dueInput = $('input[name="due_date"],input[name="start_date"]',form);
+          const day = dueInput?.value ? dateFromISO(dueInput.value)?.getDay() : new Date().getDay();
+          if (Number.isInteger(day)) boxes[day].checked = true;
+        } else if (checked.length > 1) {
+          checked.slice(1).forEach(b=>b.checked=false);
+        }
+      }
+      refresh();
+    });
+
+    $$('input[name="recurrence_day"]',dayBlock).forEach(box => box.addEventListener('change', () => {
+      if (recurrenceSelect.value === 'weekly' && box.checked) {
+        $$('input[name="recurrence_day"]',dayBlock).forEach(other => {
+          if (other !== box) other.checked = false;
+        });
+      }
+    }));
+
+    refresh();
+  }
+
+  function showQuestForm(existing=null) {
+    if (!state.actorProfile) return showIdentityPicker(true);
+
+    const isEdit = !!existing;
+    const today = localISODate();
+    const evidenceValue = existing?.evidence_required ? (existing.evidence_type || 'any') : '';
+    const categories = ['Daily Routine','Home','Personal','Appointment','Job Hunt','Other'];
+    const recurrenceDisabled = isEdit && !!existing?.template_id;
+
+    openModal(isEdit ? 'Edit Quest' : 'Create Quest', `
+      <form id="questForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Quest title</label><input name="title" maxlength="160" required placeholder="What needs to happen?" value="${escapeHtml(existing?.title || '')}"></div>
+          <div class="field"><label>Category</label><select name="category">
+            ${categories.map(v=>`<option ${selected(v,existing?.category)}>${v}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>${isEdit?'Due date':'First date'}</label><input name="due_date" type="date" value="${escapeHtml(existing?.due_date || today)}" required></div>
+          <div class="field"><label>Due time</label><input name="due_time" type="time" value="${escapeHtml(existing?.due_time ? String(existing.due_time).slice(0,5) : '')}"></div>
+          <div class="field"><label>Evidence</label><select name="evidence_type">
+            <option value="" ${selected('',evidenceValue)}>No evidence required</option>
+            <option value="photo" ${selected('photo',evidenceValue)}>Photo</option>
+            <option value="screenshot" ${selected('screenshot',evidenceValue)}>Screenshot</option>
+            <option value="link" ${selected('link',evidenceValue)}>Link</option>
+            <option value="contact_note" ${selected('contact_note',evidenceValue)}>Contact note</option>
+            <option value="document" ${selected('document',evidenceValue)}>Document</option>
+            <option value="any" ${selected('any',evidenceValue)}>Any evidence</option>
+          </select></div>
+
+          ${isEdit ? '' : `
+          <div class="field full">
+            <label>Repeat</label>
+            <select name="recurrence_type" id="questRecurrence">
+              <option value="">One time</option>
+              <option value="daily">Daily</option>
+              <option value="weekdays">Weekdays</option>
+              <option value="weekly">Weekly</option>
+              <option value="custom">Custom days</option>
+            </select>
+            <div class="repeat-note" data-repeat-note>One-time quests appear only on the selected due date.</div>
+          </div>
+          <div class="field full is-hidden" id="questDayBlock">
+            <label>Days</label>
+            <div class="day-picker">${dayPickerHtml([])}</div>
+          </div>
+          <div class="field full">
+            <label>End date <span style="text-transform:none;color:#747e9b">(optional for recurring habits)</span></label>
+            <input name="end_date" type="date">
+          </div>`}
+
+          <div class="field full"><label>Description / notes</label><textarea name="description" placeholder="Optional details">${escapeHtml(existing?.description || '')}</textarea></div>
+        </div>
+
+        ${recurrenceDisabled ? `<div class="repeat-note">This is one occurrence of a recurring habit. Use <b>Recurrence Settings</b> from the quest’s ⋯ menu to change the habit itself.</div>` : ''}
+
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">${isEdit ? 'Save Changes' : 'Create Quest'}</button>
+          <button class="secondary-btn" type="button" data-cancel>Cancel</button>
+        </div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+
+      if (!isEdit) {
+        attachRecurrenceFormBehavior(
+          $('#questForm',modalBody),
+          $('#questRecurrence',modalBody),
+          $('#questDayBlock',modalBody)
+        );
+      }
+
+      $('#questForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,isEdit ? 'Saving…' : 'Creating…');
+
+        const fd = new FormData(e.currentTarget);
+        const ev = String(fd.get('evidence_type') || '');
+        const editable = {
+          title: String(fd.get('title')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          category: fd.get('category'),
+          due_date: fd.get('due_date') || null,
+          due_time: fd.get('due_time') || null,
+          evidence_required: !!ev,
+          evidence_type: ev || 'any'
+        };
+
+        if (isEdit) {
+          const { error } = await db.from('quests').update(editable).eq('id',existing.id);
+          if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+
+          await logActivity({
+            action_type:'quest_updated',
+            quest_id:existing.id,
+            summary:'edited a quest',
+            details:{title:editable.title}
+          });
+
+          closeModal();
+          await loadAll({quiet:true});
+          toast('Quest updated.','success');
+          return;
+        }
+
+        const recurrenceType = String(fd.get('recurrence_type') || '');
+
+        if (!recurrenceType) {
+          const row = {
+            ...editable,
+            assigned_to: state.starProfile?.id || null,
+            assigned_by: state.actorProfile.id,
+            status:'not_started'
+          };
+          const { data, error } = await db.from('quests').insert(row).select('id,title').single();
+          if (error) { setBusy(btn,false); return toast(error.message,'error'); }
+
+          await logActivity({
+            action_type:'quest_created',
+            quest_id:data.id,
+            summary:'assigned a mission',
+            details:{title:data.title}
+          });
+
+          closeModal();
+          await loadAll({quiet:true});
+          toast('Quest added to the orbit.','success');
+          return;
+        }
+
+        let days = fd.getAll('recurrence_day').map(Number).filter(n=>Number.isInteger(n) && n>=0 && n<=6);
+        const startDate = editable.due_date;
+
+        if (recurrenceType === 'weekly') {
+          if (!days.length) days = [dateFromISO(startDate)?.getDay() ?? new Date().getDay()];
+          days = [days[0]];
+        }
+        if (recurrenceType === 'custom' && !days.length) {
+          setBusy(btn,false);
+          return toast('Choose at least one day for a custom habit.','error');
+        }
+
+        const templateRow = {
+          title: editable.title,
+          description: editable.description,
+          category: editable.category,
+          assigned_to: state.starProfile?.id || null,
+          assigned_by: state.actorProfile.id,
+          is_recurring: true,
+          recurrence_type: recurrenceType,
+          recurrence_days: ['weekly','custom'].includes(recurrenceType) ? days : [],
+          default_due_time: editable.due_time,
+          evidence_required: editable.evidence_required,
+          evidence_type: editable.evidence_type,
+          is_active: true,
+          start_date: startDate,
+          end_date: fd.get('end_date') || null
+        };
+
+        const { data:template, error } = await db
+          .from('quest_templates')
+          .insert(templateRow)
+          .select('*')
+          .single();
+
+        if (error) {
+          setBusy(btn,false);
+          return toast(error.message,'error');
+        }
+
+        await logActivity({
+          action_type:'habit_created',
+          summary:'created a recurring habit',
+          details:{title:template.title,recurrence:recurrenceDescription(template)}
+        });
+
+        closeModal();
+        await loadAll({quiet:true});
+        toast(`Recurring habit created: ${template.title}`,'success');
+      });
+    });
+  }
+
+  function showQuestManager(id) {
+    const q = questById(id);
+    if (!q) return toast('Quest not found.','error');
+
+    if (!q.template_id) {
+      const due = [q.due_date ? formatDate(q.due_date) : '', q.due_time ? formatTime(q.due_time) : '']
+        .filter(Boolean).join(' · ');
+      const evidence = q.evidence_required
+        ? `Evidence required: ${(q.evidence_type || 'any').replace('_',' ')}`
+        : 'No evidence required';
+
+      openModal('Manage Quest', `
+        <div class="manage-summary">
+          <b>${escapeHtml(q.title)}</b>
+          <p>${escapeHtml([q.category,due,q.status?.replace('_',' '),evidence].filter(Boolean).join(' · '))}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" id="editQuestBtn" type="button">Edit Quest</button>
+          <button class="secondary-btn" id="closeQuestManager" type="button">Close</button>
+        </div>
+        <div class="danger-zone">
+          <b>Delete quest</b>
+          <p>This permanently removes the quest. Associated evidence records are removed, and uploaded evidence files are cleaned from private storage.</p>
+          <button class="danger-btn" id="deleteQuestBtn" type="button">Delete Quest</button>
+        </div>
+      `, () => {
+        $('#editQuestBtn').onclick = () => showQuestForm(q);
+        $('#closeQuestManager').onclick = closeModal;
+        $('#deleteQuestBtn').onclick = () => deleteQuest(q);
+      });
+      return;
+    }
+
+    const template = state.templates.find(t=>t.id===q.template_id);
+    openModal('Manage Recurring Quest', `
+      <div class="manage-summary">
+        <b>↻ ${escapeHtml(q.title)}</b>
+        <p>${escapeHtml([
+          q.category,
+          q.due_date ? formatDate(q.due_date) : '',
+          q.status?.replace('_',' '),
+          template ? recurrenceDescription(template) : 'Recurring habit'
+        ].filter(Boolean).join(' · '))}</p>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="editOccurrenceBtn" type="button">Edit This Occurrence</button>
+        ${template ? '<button class="secondary-btn" id="editRecurrenceBtn" type="button">Recurrence Settings</button>' : ''}
+        <button class="secondary-btn" id="closeRecurringManager" type="button">Close</button>
+      </div>
+      <div class="danger-zone">
+        <b>Skip this occurrence</b>
+        <p>Removes this date from Today’s Orbit without ending the recurring habit. The habit will return on its next scheduled day.</p>
+        <button class="danger-btn" id="skipOccurrenceBtn" type="button">Skip This Occurrence</button>
+      </div>
+    `, () => {
+      $('#editOccurrenceBtn').onclick = () => showQuestForm(q);
+      if (template) $('#editRecurrenceBtn').onclick = () => showTemplateForm(template);
+      $('#closeRecurringManager').onclick = closeModal;
+      $('#skipOccurrenceBtn').onclick = () => skipRecurringOccurrence(q);
+    });
+  }
+
+  async function skipRecurringOccurrence(q) {
+    if (!confirm(`Skip "${q.title}" for ${q.due_date ? formatDate(q.due_date) : 'this occurrence'}?`)) return;
+    const btn = $('#skipOccurrenceBtn');
+    setBusy(btn,true,'Skipping…');
+
+    const { error } = await db
+      .from('quests')
+      .update({status:'cancelled'})
+      .eq('id',q.id);
+
+    if (error) {
+      setBusy(btn,false);
+      return toast(error.message,'error');
+    }
+
+    await logActivity({
+      action_type:'habit_occurrence_skipped',
+      quest_id:q.id,
+      summary:'skipped a recurring quest',
+      details:{title:q.title,due_date:q.due_date}
+    });
+
+    closeModal();
+    await loadAll({quiet:true});
+    toast('Occurrence skipped.','success');
+  }
+
+  function showTemplateForm(template=null) {
+    if (!template) return;
+    const days = Array.isArray(template.recurrence_days) ? template.recurrence_days : [];
+
+    openModal('Recurrence Settings', `
+      <form id="templateForm" class="auth-form">
+        <div class="modal-grid">
+          <div class="field full"><label>Habit title</label><input name="title" maxlength="160" required value="${escapeHtml(template.title || '')}"></div>
+          <div class="field"><label>Category</label><select name="category">
+            ${['Daily Routine','Home','Personal','Appointment','Job Hunt','Other'].map(v=>`<option ${selected(v,template.category)}>${v}</option>`).join('')}
+          </select></div>
+          <div class="field"><label>Due time</label><input name="default_due_time" type="time" value="${escapeHtml(template.default_due_time ? String(template.default_due_time).slice(0,5) : '')}"></div>
+          <div class="field full"><label>Repeat</label><select name="recurrence_type" id="templateRecurrence">
+            <option value="daily" ${selected('daily',template.recurrence_type)}>Daily</option>
+            <option value="weekdays" ${selected('weekdays',template.recurrence_type)}>Weekdays</option>
+            <option value="weekly" ${selected('weekly',template.recurrence_type)}>Weekly</option>
+            <option value="custom" ${selected('custom',template.recurrence_type)}>Custom days</option>
+          </select></div>
+          <div class="field full ${['weekly','custom'].includes(template.recurrence_type)?'':'is-hidden'}" id="templateDayBlock">
+            <label>Days</label>
+            <div class="day-picker">${dayPickerHtml(days)}</div>
+          </div>
+          <div class="field"><label>Start date</label><input name="start_date" type="date" required value="${escapeHtml(templateStartDate(template))}"></div>
+          <div class="field"><label>End date</label><input name="end_date" type="date" value="${escapeHtml(template.end_date || '')}"></div>
+          <div class="field"><label>Evidence</label><select name="evidence_type">
+            <option value="" ${template.evidence_required?'':'selected'}>No evidence required</option>
+            <option value="photo" ${template.evidence_required && template.evidence_type==='photo'?'selected':''}>Photo</option>
+            <option value="screenshot" ${template.evidence_required && template.evidence_type==='screenshot'?'selected':''}>Screenshot</option>
+            <option value="link" ${template.evidence_required && template.evidence_type==='link'?'selected':''}>Link</option>
+            <option value="contact_note" ${template.evidence_required && template.evidence_type==='contact_note'?'selected':''}>Contact note</option>
+            <option value="document" ${template.evidence_required && template.evidence_type==='document'?'selected':''}>Document</option>
+            <option value="any" ${template.evidence_required && template.evidence_type==='any'?'selected':''}>Any evidence</option>
+          </select></div>
+          <div class="field full"><label>Description / notes</label><textarea name="description">${escapeHtml(template.description || '')}</textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Save Recurrence</button>
+          <button class="secondary-btn" type="button" data-cancel>Cancel</button>
+        </div>
+      </form>
+    `, () => {
+      $('[data-cancel]',modalBody).onclick = closeModal;
+
+      attachRecurrenceFormBehavior(
+        $('#templateForm',modalBody),
+        $('#templateRecurrence',modalBody),
+        $('#templateDayBlock',modalBody)
+      );
+
+      $('#templateForm',modalBody).addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = e.currentTarget.querySelector('button[type=submit]');
+        setBusy(btn,true,'Saving…');
+
+        const fd = new FormData(e.currentTarget);
+        const recurrenceType = String(fd.get('recurrence_type'));
+        let days = fd.getAll('recurrence_day').map(Number).filter(n=>Number.isInteger(n) && n>=0 && n<=6);
+
+        if (recurrenceType === 'weekly') {
+          if (!days.length) days = [dateFromISO(fd.get('start_date'))?.getDay() ?? new Date().getDay()];
+          days = [days[0]];
+        }
+        if (recurrenceType === 'custom' && !days.length) {
+          setBusy(btn,false);
+          return toast('Choose at least one day for a custom habit.','error');
+        }
+
+        const ev = String(fd.get('evidence_type') || '');
+        const patch = {
+          title: String(fd.get('title')).trim(),
+          description: String(fd.get('description') || '').trim() || null,
+          category: fd.get('category'),
+          recurrence_type: recurrenceType,
+          recurrence_days: ['weekly','custom'].includes(recurrenceType) ? days : [],
+          default_due_time: fd.get('default_due_time') || null,
+          evidence_required: !!ev,
+          evidence_type: ev || 'any',
+          start_date: fd.get('start_date'),
+          end_date: fd.get('end_date') || null
+        };
+
+        const { error } = await db.from('quest_templates').update(patch).eq('id',template.id);
+        if (error) {
+          setBusy(btn,false);
+          return toast(error.message,'error');
+        }
+
+        const today = localISODate();
+        await db.from('quests')
+          .update({
+            title:patch.title,
+            description:patch.description,
+            category:patch.category,
+            due_time:patch.default_due_time,
+            evidence_required:patch.evidence_required,
+            evidence_type:patch.evidence_type
+          })
+          .eq('template_id',template.id)
+          .eq('due_date',today)
+          .neq('status','completed');
+
+        await logActivity({
+          action_type:'habit_updated',
+          summary:'edited a recurring habit',
+          details:{title:patch.title,recurrence:recurrenceDescription({...template,...patch})}
+        });
+
+        closeModal();
+        await loadAll({quiet:true});
+        toast('Recurring habit updated.','success');
+      });
+    });
+  }
+
+  function showHabitsModal() {
+    const templates = state.templates || [];
+
+    const rows = templates.map(t => `
+      <div class="habit-card">
+        <div class="habit-head">
+          <div>
+            <b>↻ ${escapeHtml(t.title)}</b>
+            <p>${escapeHtml([
+              recurrenceDescription(t),
+              t.default_due_time ? formatTime(t.default_due_time) : '',
+              t.evidence_required ? `${(t.evidence_type || 'any').replace('_',' ')} evidence` : ''
+            ].filter(Boolean).join(' · '))}</p>
+          </div>
+          <span class="habit-status ${t.is_active?'active':'paused'}">${t.is_active?'Active':'Paused'}</span>
+        </div>
+        <div class="habit-actions">
+          <button class="secondary-btn" type="button" data-edit-habit="${escapeHtml(t.id)}">Edit</button>
+          <button class="secondary-btn" type="button" data-toggle-habit="${escapeHtml(t.id)}">${t.is_active?'Pause':'Resume'}</button>
+          <button class="danger-btn" type="button" data-delete-habit="${escapeHtml(t.id)}">Delete Recurrence</button>
+        </div>
+      </div>`).join('');
+
+    openModal('Recurring Habits', `
+      <div class="repeat-note" style="margin:0 0 12px">
+        Active habits create the occurrence due today when Star’s Galaxy is opened. Pausing stops new occurrences but keeps past quest history.
+      </div>
+      <div class="habit-list">${rows || '<div class="quest-list-empty">No recurring habits yet. Create one from + ADD → New Quest.</div>'}</div>
+    `, () => {
+      $$('[data-edit-habit]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => showTemplateForm(state.templates.find(t=>t.id===btn.dataset.editHabit)))
+      );
+      $$('[data-toggle-habit]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => toggleHabit(btn.dataset.toggleHabit))
+      );
+      $$('[data-delete-habit]',modalBody).forEach(btn =>
+        btn.addEventListener('click', () => deleteHabit(btn.dataset.deleteHabit))
+      );
+    });
+  }
+
+  async function toggleHabit(id) {
+    const t = state.templates.find(x=>x.id===id);
+    if (!t) return;
+
+    const next = !t.is_active;
+    const { error } = await db.from('quest_templates').update({is_active:next}).eq('id',id);
+    if (error) return toast(error.message,'error');
+
+    await logActivity({
+      action_type: next ? 'habit_resumed' : 'habit_paused',
+      summary: next ? 'resumed a recurring habit' : 'paused a recurring habit',
+      details:{title:t.title}
+    });
+
+    await loadAll({quiet:true});
+    showHabitsModal();
+    toast(`${t.title}: ${next?'resumed':'paused'}.`,'success');
+  }
+
+  async function deleteHabit(id) {
+    const t = state.templates.find(x=>x.id===id);
+    if (!t) return;
+    if (!confirm(`Delete the recurrence for "${t.title}"? Past quest history will remain.`)) return;
+
+    const { error } = await db.from('quest_templates').delete().eq('id',id);
+    if (error) return toast(error.message,'error');
+
+    await logActivity({
+      action_type:'habit_deleted',
+      summary:'deleted a recurring habit',
+      details:{title:t.title}
+    });
+
+    closeModal();
+    await loadAll({quiet:true});
+    toast(`Recurrence deleted: ${t.title}`,'success');
+  }
+
+  function showAddMenu() {
+    openModal('Add to Star’s Galaxy', `
+      <div class="choice-grid">
+        <button class="choice" type="button" data-add="quest"><b>✓ New Quest</b><span>Create a one-time quest or a recurring habit.</span></button>
+        <button class="choice" type="button" data-add="habits"><b>↻ Manage Habits</b><span>Edit, pause, resume, or delete recurring quests.</span></button>
+        <button class="choice" type="button" data-add="job"><b>▣ Job Opportunity</b><span>Add a role to the job pipeline and track its status.</span></button>
+        <button class="choice" type="button" data-add="document"><b>▤ Document</b><span>Add a resume, cover letter, references, or another key link.</span></button>
+      </div>
+    `, () => {
+      $$('[data-add]',modalBody).forEach(btn => btn.addEventListener('click', () => {
+        if (btn.dataset.add === 'quest') showQuestForm();
+        if (btn.dataset.add === 'habits') showHabitsModal();
+        if (btn.dataset.add === 'job') showJobForm();
+        if (btn.dataset.add === 'document') showDocumentForm();
+      }));
     });
   }
 
